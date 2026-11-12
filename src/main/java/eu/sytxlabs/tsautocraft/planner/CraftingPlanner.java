@@ -12,16 +12,9 @@ import java.util.function.Function;
 import java.util.function.ToLongFunction;
 
 /**
- * Recursively resolves a crafting request into a list of steps (pattern x count).
- * <p>
- * Intentionally free of Minecraft dependencies so it can be tested without the game.
- * {@code K} is the item key (equals/hashCode must be correct), {@code P} the pattern.
- * <ul>
- *   <li>Stock is used for intermediates and raw materials, but only once (virtual storage).</li>
- *   <li>Surplus of a pattern (e.g. 4 planks instead of 1) goes into virtual storage and is reused.</li>
- *   <li>Several patterns for the same item: the first without missing items wins, otherwise the first one.</li>
- *   <li>Cycles (A needs B needs A) and too deep trees are reported as missing instead of looping forever.</li>
- * </ul>
+ * Resolves a request recursively into steps (pattern x count). Free of Minecraft so the self test runs without the game;
+ * {@code K} = item key (needs equals/hashCode), {@code P} = pattern. Stock counts once (virtual storage), surplus is
+ * reused, the first pattern without missing items wins, cycles and too deep trees count as missing.
  */
 public final class CraftingPlanner<K, P> {
 	public static final int MAX_DEPTH = 48;
@@ -151,7 +144,6 @@ public final class CraftingPlanner<K, P> {
 		if (current != null) current.missing += amount;
 	}
 
-	/** Craft {@code amount} of {@code k} using patterns. */
 	private void craft(K k, long amount, int depth) {
 		List<P> candidates = patternsFor.apply(k);
 		if (candidates == null || candidates.isEmpty() || depth > MAX_DEPTH || inProgress.contains(k)) {

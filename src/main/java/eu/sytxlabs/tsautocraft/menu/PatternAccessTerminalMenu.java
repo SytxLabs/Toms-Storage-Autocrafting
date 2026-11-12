@@ -35,14 +35,11 @@ import eu.sytxlabs.tsautocraft.pattern.PatternData;
 import eu.sytxlabs.tsautocraft.pattern.PatternItem;
 
 /**
- * Pattern Access Terminal: the pattern slots of all Pattern Providers on the network, one header line per provider
- * followed by its rows of 9 slots. Only a window of {@value #LINES} lines exists as real slots; the server maps them to
- * the provider slots currently in view.
- * <p>Slot order: 0-53 window ({@value #LINES} lines x 9), 54-89 player inventory.
- * <p>Client -> server: {@code scroll} (first line) with {@code all} or {@code view} (positions of the providers that
- * pass the search/filter; the client filters, so names are searched in the player's language).
- * <br>Server -> client (every 10 ticks if changed, at once after a request): {@code dir} (every provider with name,
- * slot count and pattern outputs), {@code lines} (the window), {@code scroll} (clamped).
+ * Pattern Access Terminal: only a window of {@value #LINES} lines (slots 0-53, player inventory 54-89) are real slots,
+ * mapped server side to the provider slots in view.
+ * <p>Client -> server: {@code scroll} (first line) with {@code all} or {@code view} (providers passing the client-side
+ * filter, so names match the player's language). Server -> client (every 10 ticks if changed, at once after a request):
+ * {@code dir} (providers with name, slot count, outputs), {@code lines} (the window), {@code scroll} (clamped).
  */
 public class PatternAccessTerminalMenu extends AbstractContainerMenu implements IDataReceiver {
 	public static final int WIDTH = 194, HEIGHT = 228, GRID_X = 8, GRID_Y = 18, LINES = 6, COLS = 9, PLAYER_Y = 146;

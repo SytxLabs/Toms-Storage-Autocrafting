@@ -25,14 +25,8 @@ import eu.sytxlabs.tsautocraft.menu.MenuUtil;
 import eu.sytxlabs.tsautocraft.util.MathExpr;
 
 /**
- * AE2 style request dialog, opened from a Tom's terminal (Ctrl + click on a craftable item, or click on a
- * craftable item that is not in storage) or from the Autocrafting Terminal.
- * <ol>
- *   <li>Amount -> "Calculate" sends {@code tsac_plan}.</li>
- *   <li>Material list (from storage / to craft / missing, all crafting steps) -> "Start" sends {@code tsac_req}.
- *   The tree button opens the recipe tree as a graph ({@link RecipeTreeScreen}), which can start the job too.</li>
- * </ol>
- * Tom's sync packets keep going to the screen underneath, so its item list stays valid.
+ * Request dialog (from a Tom's terminal or the Autocrafting Terminal): "Calculate" sends {@code tsac_plan}, "Start"
+ * sends {@code tsac_req}. Tom's sync packets keep going to the screen underneath, so its item list stays valid.
  */
 public class CraftRequestScreen extends Screen implements IDataReceiver {
 	private static final int W = 230, H = 196, H_INPUT = 132;
@@ -40,6 +34,8 @@ public class CraftRequestScreen extends Screen implements IDataReceiver {
 	private static final int AMOUNT_Y = 38, MESSAGE_Y = AMOUNT_Y + 58;
 	private static final int LIST_Y = 40, ROW_H = 18, ROWS = 6;
 	private static final int MAX_MISSING_LINES = 3;
+	/** Shared instance so a fixed amount can clear exactly this message (identity check). */
+	private static final Component INVALID_AMOUNT = Component.translatable("msg.tsautocraft.request.invalid_amount");
 
 	private final Screen parent;
 	private final ItemStack item;
@@ -48,6 +44,8 @@ public class CraftRequestScreen extends Screen implements IDataReceiver {
 	private Button calcBtn, startBtn, backBtn, maxBtn, viewBtn;
 	private long maxPossible = -1;
 	private Component message = Component.empty();
+	/** {@link #message} is a neutral status (e.g. "Calculating…"), not an error: drawn grey instead of red. */
+	private boolean messageInfo;
 	private final List<Missing> missing = new ArrayList<>();
 	private final List<PlanEntry> materials = new ArrayList<>();
 	private final List<TreeLine> tree = new ArrayList<>();
@@ -106,7 +104,7 @@ public class CraftRequestScreen extends Screen implements IDataReceiver {
 
 	private final List<Button> amountButtons = new ArrayList<>();
 
-	/** Amount field changed: red text and no "Calculate" while the expression is invalid. */
+	/** Amount field changed: red text while the expression is invalid ("Calculate" stays clickable and explains why). */
 	private void amountChanged() {
 		String v = amountBox.getValue();
 		StringBuilder clean = new StringBuilder(v.length());
@@ -117,7 +115,7 @@ public class CraftRequestScreen extends Screen implements IDataReceiver {
 		}
 		boolean ok = !Double.isNaN(MathExpr.eval(amountBox.getValue()));
 		amountBox.setTextColor(ok ? 0xFFE0E0E0 : 0xFFFF5555);
-		if (calcBtn != null) calcBtn.active = ok;
+		if (ok && message == INVALID_AMOUNT) setMessage(Component.empty(), false);
 	}
 
 	/** Switches between the compact amount view and the tall preview (size and widget positions change). */
@@ -182,12 +180,16 @@ public class CraftRequestScreen extends Screen implements IDataReceiver {
 	}
 
 	private void calculate() {
-		if (Double.isNaN(MathExpr.eval(amountBox.getValue()))) return;
+		missing.clear();
+		if (Double.isNaN(MathExpr.eval(amountBox.getValue()))) {
+			setMessage(INVALID_AMOUNT, false);
+			return;
+		}
 		previewAmount = parseAmount();
 		amountBox.setValue(Long.toString(previewAmount));
-		message = Component.empty();
-		missing.clear();
 		if (minecraft.player == null) return;
+		// replaced by the preview or a tsac_res answer
+		setMessage(Component.translatable("msg.tsautocraft.request.calculating"), true);
 		MenuUtil.sendToServer(minecraft.player, out -> {
 			out.store("tsac_plan", ItemStack.CODEC, item);
 			out.putLong("tsac_amt", previewAmount);
@@ -204,9 +206,14 @@ public class CraftRequestScreen extends Screen implements IDataReceiver {
 		});
 	}
 
+	private void setMessage(Component msg, boolean info) {
+		message = msg;
+		messageInfo = info;
+	}
+
 	private void back() {
 		if (preview) {
-			message = Component.empty();
+			setMessage(Component.empty(), false);
 			setPreview(false);
 			setInitialFocus(amountBox);
 		} else {
@@ -224,7 +231,7 @@ public class CraftRequestScreen extends Screen implements IDataReceiver {
 			planOk = in.getBooleanOr("tsac_ok", false);
 			maxPossible = in.getLongOr("tsac_max", -1);
 			scroll = 0;
-			message = planOk ? Component.empty() : maxPossible > 0 ? Component.translatable("msg.tsautocraft.request.missing_possible", maxPossible) : Component.translatable("msg.tsautocraft.request.missing");
+			setMessage(planOk ? Component.empty() : maxPossible > 0 ? Component.translatable("msg.tsautocraft.request.missing_possible", maxPossible) : Component.translatable("msg.tsautocraft.request.missing"), false);
 			setPreview(true);
 			return;
 		}
@@ -241,14 +248,15 @@ public class CraftRequestScreen extends Screen implements IDataReceiver {
 			onClose();
 			return;
 		}
-		message = Component.translatable(res.get());
+		setMessage(Component.translatable(res.get()), false);
 	}
 
 	@Override
 	public boolean keyPressed(KeyEvent event) {
 		if (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER) {
-			if (preview) start();
-			else calculate();
+			if (!preview) calculate();
+			else if (maxBtn.visible && maxBtn.active) craftPossible(); // failed plan: Enter takes the offered "Craft N"
+			else start();
 			return true;
 		}
 		if (event.isEscape() && preview) {
@@ -312,12 +320,12 @@ public class CraftRequestScreen extends Screen implements IDataReceiver {
 
 	private void extractMaterials(GuiGraphicsExtractor g, int mouseX, int mouseY) {
 		int x0 = left + 7, y0 = top + LIST_Y, x1 = left + W - 7, y1 = y0 + ROWS * ROW_H;
-		g.fill(x0, y0, x1, y1, 0xFF8B8B8B);
+		g.fill(x0, y0, x1, y1, 0xFF373737);
 		ItemStack hovered = ItemStack.EMPTY;
 		for (int r = 0; r < ROWS && r + scroll < materials.size(); r++) {
 			PlanEntry e = materials.get(r + scroll);
 			int y = y0 + r * ROW_H;
-			if (e.missing() > 0) g.fill(x0, y, x1, y + ROW_H, 0xFFB06060);
+			if (e.missing() > 0) g.fill(x0, y, x1, y + ROW_H, 0xFF7A2020);
 			g.item(e.item(), x0 + 1, y + 1);
 			int x = x1 - 2;
 			x = amountText(g, x, y + 5, e.missing(), "label.tsautocraft.plan.missing", 0xFFFFFFFF);
@@ -344,7 +352,7 @@ public class CraftRequestScreen extends Screen implements IDataReceiver {
 
 	private void extractMessage(GuiGraphicsExtractor g, int y, int maxMissing) {
 		if (message.getString().isEmpty()) return;
-		g.text(font, font.plainSubstrByWidth(message.getString(), W - 16), left + 8, y, 0xFF8B0000, false);
+		g.text(font, font.plainSubstrByWidth(message.getString(), W - 16), left + 8, y, messageInfo ? 0xFF404040 : 0xFF8B0000, false);
 		y += 10;
 		for (int i = 0; i < missing.size() && i < maxMissing; i++) {
 			Missing m = missing.get(i);

@@ -38,8 +38,11 @@ The user (Shaun) talks German; reply in German.
   Tom's Storage 2.11.3 is the available NeoForge build (Fabric uses 2.11.4). Shared 26.2 API branches cover Minecraft differences.
 - Forge: not possible, Tom's Storage has no Forge build after 1.20.1.
 
-## Status (2026-11-10)
+## Status (2026-11-12)
 
+- 0.7.0 in preparation (not released, not tested in game): MC 26.2 support (PR #2), review fixes (fluid units are
+  never voided, extension pull surplus goes back, fluid unit hidden in JEI/REI), antislop GUI/copy pass (recipe tree
+  legend/keyboard, confirm clicks for cancel/clear, guide keyboard TOC). antislop audit: `anti-slop/audit-001-*.md`.
 - Fabric 26.2 (`26.2-fabric`) passes both planner and game tests (7 required tests); `buildAndCollect` builds all four nodes.
 - NeoForge 26.2 (`26.2-neoforge`) compiles and packages against Tom's Storage 2.11.3; runtime has not been tested in game.
 - Fabric 26.3 passes 7 required game tests; NeoForge 26.3 passes 6; both 26.2 and 26.3 planner tests and `buildAndCollect` pass.
@@ -138,7 +141,7 @@ The user (Shaun) talks German; reply in German.
   cached per tick). New jobs: `JobScheduler.started`. Jobs can be paused (no reservations, reason PAUSED) and prioritized
   from the Autocrafting Terminal (`pause`/`prio` messages). Every step keeps a transient reason (missing item have/need,
   provider pos/name) shown in the job tooltip (`StepView`).
-- 0.6.0 (branch `feature/network-api`, not committed yet: the user commits): API 4 + JEI/REI fluid ingredients as
+- 0.6.0 (released, tag `0.6.0`): API 4 + JEI/REI fluid ingredients as
   buckets (`compat/FluidIngredients`, reflection on the viewers' fluid objects) + `api/TerminalReach` (hooked into
   `util/TerminalAccess`).
 - API 4 (for Tom's Storage Network `D:\IdeaProjects\TomsStorageNetwork`):
@@ -206,7 +209,7 @@ The user (Shaun) talks German; reply in German.
   alternatives roll back their children); `CraftingJob.TreeLine` = flattened pre-order (max 200 lines / depth 16, empty item =
   "n more"), sent as `tsac_tree`; the "Tree" button opens `client/RecipeTreeScreen` (full screen graph: nodes = slot with
   icon + amount, frame red/blue/grey = missing/crafted/stored, subtree-width layout top-down, right-angled edges; drag /
-  arrow keys pan, wheel zooms 50-200 % via `g.pose()` scale, click collapses (+N badge); starts collapsed from depth 2 except
+  arrow keys pan, wheel zooms 50-400 % via `g.pose()` scale, "Center"/Home fits the visible tree into the view, click collapses (+N badge); starts collapsed from depth 2 except
   paths to missing items; "Start" returns to the request screen and calls its `start()`, data packets are forwarded to it).
 - Job history: `AutocraftingTerminalBlockEntity` records its own finished jobs and watches the running jobs of the other owners
   on the network (scan every 20 ticks, keeps the job reference until it is finished) -> `JobHistoryEntry` list ("History",

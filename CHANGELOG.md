@@ -1,3 +1,34 @@
+# 0.7.0
+
+## New
+
+- Minecraft 26.2 on Fabric (Tom's Storage 2.11.4) and NeoForge (Tom's Storage 2.11.3), thanks to Cornit.
+- Recipe tree: legend (missing / crafted / stored), "Expand all", keyboard control (arrow keys pan, +/- zoom, Home
+  centers, Enter starts the request). Node states also show as badges, not only as frame colors.
+- Cancelling a job and clearing the history need a second click on the same button.
+- Paused jobs say "(Paused)" in their row instead of showing it only through the play/pause glyph.
+- The request screen shows "Calculating…" while the preview is on its way and explains an invalid amount
+  (e.g. "64*3") instead of doing nothing; Enter takes the offered "Craft N" after a failed preview.
+- Craftable items in Tom's terminals: the green "+" sits on a dark backdrop, and the tooltip says how to request.
+- Guide book: the table of contents works with the keyboard (Up/Down, Enter).
+
+## Fixed
+
+- Fluid units that no stock extension takes are kept by the block that pushed them instead of disappearing.
+- A stock extension that delivers more than asked no longer hands the surplus to the caller: it goes back to storage.
+- Fluid units of mod fluids without a fluid block are named after the fluid id instead of "Air".
+- The virtual fluid unit item no longer shows up in JEI/REI (`c:hidden_from_recipe_viewers`).
+- Clearer wording in messages, tooltips and guide pages (all four languages).
+
+## Development
+
+- Game test reports of every loader and Minecraft version are uploaded as one artifact (`gametest-reports`).
+
+## API 4 (unchanged version, backward compatible)
+
+- `MachineProfile.sidesFor` / `Route.matches` take an optional `Level` (needed for furnace fuel on 26.2); the old
+  signatures stay.
+
 # 0.6.0
 
 ## New

@@ -61,19 +61,9 @@ import eu.sytxlabs.tsautocraft.util.StorageUtil;
 import eu.sytxlabs.tsautocraft.util.UpgradeContainer;
 
 /**
- * Pattern Provider: holds up to 9 patterns and supplies the machine in front of it.
- * <ul>
- *   <li><b>Crafting patterns</b> (target must be a {@code minecraft:crafter}): ingredients are placed into slots 0-8 as configured in the pattern (order = crafter grid, top left to bottom right), moved to enabled
- *       slots if needed. How the crafter is triggered depends on {@code crafterTrigger} in the config (the player's own redstone circuit, a direct block tick, or a 2-tick redstone pulse from the provider).
- *       The next delivery only happens once the crafter is empty again.</li>
- *   <li><b>Processing patterns</b>: all inputs are inserted into the machine at once, but only if everything fits. In blocking mode (default) only once none of the pattern's inputs are left in the machine.</li>
- *   <li><b>Smelting patterns</b> (target must be a furnace, blast furnace or smoker): the input goes straight into the input slot, from any side. Fuel is up to the player.</li>
- *   <li>Modes of other mods ({@link eu.sytxlabs.tsautocraft.api.PatternModes}) deliver through {@link PatternMode#dispatch}.</li>
- * </ul>
- * 9 pattern slots, each Capacity Upgrade unlocks 9 more (up to {@value #SLOTS}). Speed Upgrades: one more delivery per
- * tick and a shorter crafter cooldown each; Stack Upgrades: 4 times more crafts per delivery each (up to {@value #MAX_SETS}).
- * Results do NOT return automatically: they must reach the network through an Importer (or a chest that is part
- * of the storage).
+ * Pattern Provider: supplies adjacent machines from its patterns, each mode delivers through {@link PatternMode#dispatch}.
+ * A crafter gets its next set only once it is empty again. Results never return on their own: they reach the network
+ * through an Importer or a chest that is part of the storage.
  */
 public class PatternProviderBlockEntity extends PaintedBlockEntity implements TickableServer, MenuProvider, CraftingProvider, Upgrades.UpgradeHost, StatusInfo, MemoryCardHost {
 	private final CustomName customName = new CustomName();
@@ -636,7 +626,7 @@ public class PatternProviderBlockEntity extends PaintedBlockEntity implements Ti
 		crafter.setChanged();
 		lastCrafter[side.ordinal()] = now;
 		int ticks = TsAutocraftConfig.get().crafterPulseTicks;
-		// Lights the provider; a redstone signal to THIS crafter only in REDSTONE mode
+		// Lights the provider; a redstone signal to this crafter only in REDSTONE mode
 		if (trigger == CrafterTrigger.REDSTONE) signal(side, ticks);
 		else light(ticks);
 		if (trigger == CrafterTrigger.DIRECT) level.scheduleTick(tp, cs.getBlock(), 1); // CrafterBlock.tick crafts once

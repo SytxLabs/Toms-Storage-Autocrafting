@@ -19,7 +19,7 @@ import eu.sytxlabs.tsautocraft.util.ItemKey;
 
 /**
  * A kind of pattern: how the Pattern Terminal encodes it and how a Pattern Provider delivers it to the machine in front of it.
- * Built-in: crafting, processing, smelting. Other mods register their own in their {@code ModInitializer} with {@link PatternModes#register(PatternMode)} (on both sides, in the same order).
+ * Built-in: crafting, processing, smelting, fluid, brewing. Other mods register their own in their {@code ModInitializer} with {@link PatternModes#register(PatternMode)} (on both sides, in the same order).
  * <p>
  * The mode is stored in the pattern by {@link #id()}; patterns of an unknown mode behave like processing patterns.
  */

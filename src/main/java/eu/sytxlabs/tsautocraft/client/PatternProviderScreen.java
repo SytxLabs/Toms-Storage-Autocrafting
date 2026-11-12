@@ -97,7 +97,7 @@ public class PatternProviderScreen extends TSContainerScreen<PatternProviderMenu
 		int active = menu.activeSlots();
 		if (active < PatternProviderBlockEntity.SLOTS) {
 			Component hint = Component.translatable("label.tsautocraft.capacity_hint");
-			g.text(font, font.plainSubstrByWidth(hint.getString(), 160), 88 - Math.min(160, font.width(hint)) / 2, PatternProviderMenu.GRID_Y + (active / 9) * 18 + 4, 0xFFE0E0E0, true);
+			g.text(font, font.plainSubstrByWidth(hint.getString(), 160), 88 - Math.min(160, font.width(hint)) / 2, PatternProviderMenu.GRID_Y + (active / 9) * 18 + 4, 0xFFFFFFFF, true); // white: 5.3:1 on the locked slot grey
 		}
 	}
 

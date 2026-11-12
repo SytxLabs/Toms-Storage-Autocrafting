@@ -2,4 +2,4 @@ Modus: Brauen
 
 Für den Braustand. In diesem Modus sieht das Raster des Pattern Terminals wie der Braustand aus: Brennstoff oben links (optional), Zutat oben in der Mitte, 1-3 Flaschen in der unteren Reihe (sie dürfen verschieden sein); die Ergebnisse kommen aus den Braurezepten, auch aus Mods und Datapacks.
 
-Der Provider befüllt einen leeren Braustand: Flaschen und Zutat bei jedem Brauvorgang, den Brennstoff nur, wenn das Brennstofffach leer ist (er zählt nicht pro Brauvorgang, eine Lohe reicht für 20). JEI/REI "+" kodiert einen vollen Braustand. Der Importer wartet, bis fertig gebraut ist, und nimmt nie unfertige Tränke.
+Der Provider befüllt einen leeren Braustand: Flaschen und Zutat bei jedem Brauvorgang, den Brennstoff nur, wenn das Brennstofffach leer ist (er zählt nicht pro Brauvorgang, ein Lohenstaub reicht für 20). JEI/REI "+" kodiert einen vollen Braustand. Der Importer wartet, bis fertig gebraut ist, und nimmt nie unfertige Tränke.

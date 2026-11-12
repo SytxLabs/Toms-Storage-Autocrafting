@@ -33,7 +33,7 @@ import com.tom.storagemod.util.TickerUtil;
  * Base for all addon blocks: a functional node in Tom's cable network
  * ({@link IInventoryCable#isFunctionalNode()} = true), ticks on the server and opens its menu.
  * <p>
- * Important: these blocks expose NO item storage. That way they (and the machines behind them)
+ * These blocks expose no item storage, so they (and the machines behind them)
  * are not picked up as storage by the Inventory Connector.
  */
 public class NodeBlock extends BaseEntityBlock implements IInventoryCable {
@@ -85,7 +85,7 @@ public class NodeBlock extends BaseEntityBlock implements IInventoryCable {
 		return InteractionResult.SUCCESS;
 	}
 
-	// --- Keep Tom's cable network cache up to date (same approach as Tom's Level Emitter) ---
+	// Keep Tom's cable network cache up to date (same approach as Tom's Level Emitter)
 
 	@Override
 	public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {

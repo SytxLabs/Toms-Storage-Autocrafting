@@ -2,7 +2,7 @@
 
 Unofficial addon for [Tom's Simple Storage](https://modrinth.com/mod/toms-storage) that adds AE2-style autocrafting.
 Fabric 26.2 uses Tom's Storage 2.11.4, NeoForge 26.2 uses 2.11.3, and Fabric/NeoForge 26.3 use 2.12.2.
-All text is translatable (`assets/tsautocraft/lang/*.json`); English and German are included.
+All text is translatable (`assets/tsautocraft/lang/*.json`); English, German, French and Spanish are included.
 
 Download: [Modrinth](https://modrinth.com/mod/toms-storage-autocrafting) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/toms-storage-autocrafting)
 
@@ -22,7 +22,7 @@ Java **25+** is required. Install the mod on both client and server.
 
 | Block / item                                | What it does                                                                                                                                                    |
 |---------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Pattern Provider**                        | Full block, no front. Holds 9 patterns (up to 36 with Capacity Upgrades) and supplies **every** crafter / machine around it, one after the other.               |
+| **Pattern Provider**                        | Full block, no front. Holds 9 patterns (up to 36 with Capacity Upgrades) and supplies every crafter / machine around it, one after the other.               |
 | **Pattern Provider Connector** (+ Framed)   | Cable-connector shape with a front: supplies only the machine it faces. Convert between both in a crafting grid.                                                |
 | **Pattern Terminal**                        | Tom's storage terminal plus a pattern encoder (crafting, processing, smelting, fluid and modes of other mods).                                                  |
 | **Autocrafting Terminal**                   | Lists craftable items, accepts requests, shows and manages the jobs of the whole network.                                                                       |
@@ -153,7 +153,7 @@ away; a dedicated server reads the file at startup or on `/tsautocraft reload` (
   { "blocks": ["minecraft:brewing_stand", "#c:machines"], "sides": ["north", "up"], "redstone_pulse": 2, "blocking": true }
   ```
   `sides`: faces of the machine to insert through, tried in this order per stack; `redstone_pulse`: pulse after a delivery;
-  `blocking`: force blocking mode on/off. A brewing stand profile is built in. `/reload` applies changes.
+  `blocking`: force blocking mode on/off. Profiles for furnaces, the brewing stand and dispenser/dropper are built in. `/reload` applies changes.
 * **Item tags**: `#tsautocraft:not_autocraftable` (patterns with such an output are ignored), `#tsautocraft:no_substitute`
   (never stored as a substitute).
 

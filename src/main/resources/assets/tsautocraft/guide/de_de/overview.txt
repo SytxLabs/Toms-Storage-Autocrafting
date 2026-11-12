@@ -1,6 +1,6 @@
 Überblick
 
-Diese Mod erweitert Tom's Simple Storage um Autocrafting wie in AE2. Du bringst dem Netzwerk Rezepte über Muster bei, und es craftet, was du anforderst - inklusive aller Zwischenschritte.
+Diese Mod erweitert Tom's Simple Storage um Autocrafting wie in AE2. Du bringst dem Netzwerk Rezepte über Muster bei, und es craftet, was du anforderst, samt aller Zwischenschritte.
 
 Blöcke:
 - Pattern Terminal: Lagerterminal, das Muster kodiert.

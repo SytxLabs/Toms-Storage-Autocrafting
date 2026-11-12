@@ -42,7 +42,7 @@ import eu.sytxlabs.tsautocraft.util.StorageUtil;
  * <ul>
  *   <li>{@link #MODE_BELOW}: while the stock is below the amount.</li>
  *   <li>{@link #MODE_ABOVE}: while the stock is at least the amount.</li>
- *   <li>{@link #MODE_CRAFT}: the item counts as craftable (like an AE2 crafting card) and the signal is on while a job needs it - e.g. to switch a farm on. The items have to come back through an Importer (or storage).</li>
+ *   <li>{@link #MODE_CRAFT}: the item counts as craftable (like an AE2 crafting card) and the signal is on while a job needs it, e.g. to switch a farm on. The items have to come back through an Importer (or storage).</li>
  * </ul>
  */
 public class CraftingEmitterBlockEntity extends PaintedBlockEntity implements TickableServer, MenuProvider, CraftingProvider, StatusInfo, MemoryCardHost {

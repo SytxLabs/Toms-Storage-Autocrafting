@@ -1,6 +1,6 @@
 Tarjeta de memoria
 
-Copia la configuración de un bloque a otros bloques del mismo tipo: Pattern Provider (modo de bloqueo, prioridad, bloqueo), Exporter e Importer (filtros, modo, modo redstone), Requester y Level Maintainer (entradas) y Crafting Emitter (modo, cantidad).
+Copia la configuración de un bloque a otros bloques del mismo tipo: Pattern Provider (modo de cierre, prioridad, modo bloqueo), Exporter e Importer (filtros, modo, modo redstone), Requester y Mantenedor de stock (entradas) y Crafting Emitter (modo, cantidad).
 
 - Mayús + clic derecho en un bloque: copiar su configuración en la tarjeta.
 - Clic derecho en un bloque del mismo tipo: aplicarla.

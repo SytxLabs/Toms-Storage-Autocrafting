@@ -151,7 +151,6 @@ public final class PatternEncoder {
 		return Result.ok(new PatternData(PatternData.BREWING, in, out));
 	}
 
-	/** First non-empty stack of {@code grid}. */
 	public static ItemStack firstItem(List<ItemStack> grid) {
 		for (ItemStack st : grid) if (!st.isEmpty()) return st;
 		return ItemStack.EMPTY;

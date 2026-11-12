@@ -249,7 +249,6 @@ public class AutocraftingTerminalBlockEntity extends PlatformBlockEntity impleme
 		return views;
 	}
 
-	/** Craftable items. */
 	public List<ItemStack> craftables() {
 		return TerminalCrafting.craftables(level, worldPosition);
 	}

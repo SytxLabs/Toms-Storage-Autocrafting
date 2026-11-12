@@ -24,14 +24,9 @@ import eu.sytxlabs.tsautocraft.job.CraftingJob;
 import eu.sytxlabs.tsautocraft.job.Reservations;
 
 /**
- * One shared view of a cable network for all our blocks on it: node block entities, connector, providers (sorted by
- * priority), job owners and the running jobs. Before, every block walked the network on its own.
- * <p>
- * Found by node position (every node of the network maps to the snapshot): Tom's {@link InventoryCableNetwork} only
- * caches walks that start at a cable, a walk from a node returns a new set every time. A snapshot is reused for at most
- * {@link #MAX_AGE} ticks, so cable changes show up after that.
- * {@link #invalidate()} drops all snapshots (placement, priority change); the job list is rebuilt once per tick and
- * whenever a job starts ({@link #jobsChanged()}).
+ * One shared view of a cable network (nodes, connector, providers by priority, job owners, jobs) for all our blocks.
+ * Keyed by node position: a {@link InventoryCableNetwork} walk from a node returns a new set every time. Reused for at
+ * most {@link #MAX_AGE} ticks; {@link #invalidate()} drops all, the job list is rebuilt per tick and on {@link #jobsChanged()}.
  */
 public final class NetworkCache {
 	private static final int MAX_AGE = 20;

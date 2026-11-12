@@ -113,7 +113,9 @@ public class PatternTerminalScreen extends AbstractStorageTerminalScreen<Pattern
 	}
 
 	private Component substLabel() {
-		return Component.translatable("button.tsautocraft.substitutes_short").withStyle(menu.substitutes ? ChatFormatting.GREEN : ChatFormatting.DARK_GRAY);
+		// mark as well as color, so the state does not depend on telling green from grey (both glyphs are in the default bitmap font)
+		return Component.translatable("button.tsautocraft.substitutes_short").append(menu.substitutes ? "✔" : "✘")
+				.withStyle(menu.substitutes ? ChatFormatting.GREEN : ChatFormatting.GRAY);
 	}
 
 	private Tooltip substTooltip() {
@@ -185,18 +187,18 @@ public class PatternTerminalScreen extends AbstractStorageTerminalScreen<Pattern
 		Slot right = menu.slots.get(PatternTerminalMenu.GRID + 8);
 		int cx = leftPos + reagent.x + 7, top = topPos + reagent.y + 17, bottom = topPos + left.y - 1, mid = (top + bottom) / 2;
 		int lx = leftPos + left.x + 7, rx = leftPos + right.x + 7;
-		// pipes: reagent down, split to the three bottles
+		// Pipes: reagent down, split to the three bottles
 		pipe(g, cx, top, cx + 2, mid + 2);
 		pipe(g, lx, mid, rx + 2, mid + 2);
 		pipe(g, lx, mid, lx + 2, bottom);
 		pipe(g, cx, mid, cx + 2, bottom);
 		pipe(g, rx, mid, rx + 2, bottom);
-		// brewing progress arrow right of the reagent
+		// Brewing progress arrow right of the reagent
 		Slot arrow = menu.slots.get(PatternTerminalMenu.GRID + 2);
 		int ax = leftPos + arrow.x + 7, ay = topPos + arrow.y;
 		g.fill(ax, ay + 1, ax + 2, ay + 13, 0xFF555555);
 		for (int k = 0; k < 4; k++) g.fill(ax - 3 + k, ay + 10 + k, ax + 5 - k, ay + 11 + k, 0xFF555555);
-		// what goes where
+		// Hover hint for empty positions
 		if (hoveredSlot != null && !hoveredSlot.hasItem()) {
 			int idx = menu.slots.indexOf(hoveredSlot) - PatternTerminalMenu.GRID;
 			String key = idx == PatternEncoder.BREW_FUEL ? "tooltip.tsautocraft.brewing.fuel" : idx == PatternEncoder.BREW_REAGENT ? "tooltip.tsautocraft.brewing.reagent"

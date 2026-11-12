@@ -1,9 +1,9 @@
 Carte mémoire
 
-Copie les réglages d'un bloc sur d'autres blocs du même type : Pattern Provider (mode de verrouillage, priorité, blocage), Exporter et Importer (filtres, mode, mode redstone), Requester et Level Maintainer (entrées) et Crafting Emitter (mode, quantité).
+Copie les réglages d'un bloc sur d'autres blocs du même type : Pattern Provider (mode de verrou, priorité, mode bloquant), Exporter et Importer (filtres, mode, mode redstone), Requester et Mainteneur de stock (entrées) et Crafting Emitter (mode, quantité).
 
 - Maj + clic droit sur un bloc : copier ses réglages sur la carte.
 - Clic droit sur un bloc du même type : les appliquer.
 - Maj + clic droit dans le vide : effacer la carte.
 
-La carte ne crée jamais d'objets. Les filtres (par ex. l'Item Filter de Tom) viennent de votre inventaire : un filtre non configuré du même type est réglé comme l'original ; un filtre déjà présent dans l'emplacement retourne dans votre inventaire. Les améliorations manquantes sont aussi prises dans l'inventaire. Ce qui vous manque est ignoré et listé. Les noms donnés à l'enclume ne sont pas copiés.
+La carte ne crée jamais d'items. Les items filtres (p. ex. l'Item Filter de Tom) viennent de votre inventaire : un filtre non configuré du même type est réglé comme l'original ; un filtre déjà présent dans le slot retourne dans votre inventaire. Les Upgrades manquants sont aussi prises dans l'inventaire. Ce qui vous manque est ignoré et listé. Les noms donnés à l'enclume ne sont pas copiés.

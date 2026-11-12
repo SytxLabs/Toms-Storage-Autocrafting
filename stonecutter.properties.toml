@@ -3,7 +3,7 @@
 mod.id = "tsautocraft"
 mod.name = "Tom's Storage Autocrafting"
 mod.group = "eu.sytxlabs.tsautocraft"
-mod.version = "0.6.0"
+mod.version = "0.7.0"
 
 deps.fabric_loader = "0.19.5"
 loomx.loom_version = "1.16-SNAPSHOT"

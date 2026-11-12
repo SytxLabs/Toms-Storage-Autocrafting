@@ -3,6 +3,6 @@ Crafting Emitter
 Da una señal de redstone según un objeto de la red:
 - bajo: mientras las existencias estén por debajo de la cantidad,
 - desde: mientras las existencias sean al menos la cantidad,
-- fabricar: el objeto cuenta como fabricable y la señal está activa mientras un trabajo lo necesite - p. ej. para encender una granja. Los objetos deben volver a través de un Importer o al almacén.
+- fabricar: el objeto cuenta como fabricable y la señal está activa mientras un trabajo lo necesite (p. ej. para encender una granja). Los objetos deben volver a través de un Importer o al almacén.
 
 El bloque completo emite por todos los lados. La variante direccional (y la direccional revestida) solo emite por su frontal.

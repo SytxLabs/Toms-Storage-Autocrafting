@@ -139,7 +139,6 @@ public class LevelMaintainerBlockEntity extends PlatformBlockEntity implements T
 		return statusItem[i];
 	}
 
-	/** Entry is configured: item, threshold and batch set. */
 	private boolean active(int i) {
 		return !items.getItem(i).isEmpty() && thresholds[i] > 0 && batches[i] > 0;
 	}

@@ -19,7 +19,7 @@ import com.tom.storagemod.util.BlockFace;
 
 /**
  * Node with a front side ({@link #FACING} points at the target inventory or machine).
- * Placement: click on the target - the front then faces it. The front side does NOT connect to the cable network.
+ * Placement: click on the target, the front then faces it. The front side does not connect to the cable network.
  */
 public class DirectionalNodeBlock extends NodeBlock {
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;

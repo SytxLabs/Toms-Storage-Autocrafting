@@ -28,13 +28,9 @@ import eu.sytxlabs.tsautocraft.ModContent;
 import eu.sytxlabs.tsautocraft.TsAutocraft;
 
 /**
- * Client-only "Autocrafting Guide" (opened by the guide book item). Each page is one text file per language,
- * {@code assets/tsautocraft/guide/<lang>/<id>.txt} (first line = title, the rest = text; missing language = en_us, so
- * resource packs can add translations), plus optional icons and an optional diagram (drawn above the text of its first sheet).
- * Diagrams are language independent: {@code assets/tsautocraft/guide/diagrams/<id>.txt} (no file = no diagram).
- * Long texts are split into several sheets automatically; the first sheets are the table of contents (one column each).
- * The guide is drawn as an open book: two sheets side by side, turning goes one spread (two sheets) at a time.
- * To add a page: add it to {@link #PAGES} and add its file to every language folder.
+ * Client-only guide book, drawn as an open book (turning moves one spread). Page text:
+ * {@code assets/tsautocraft/guide/<lang>/<id>.txt} (line 1 = title, en_us fallback); optional diagram:
+ * {@code guide/diagrams/<id>.txt}. A new page needs an entry in {@link #PAGES} and a file in every language folder.
  * <p>
  * Diagram file: one line per row, cells separated by spaces, {@code #} starts a comment line. A cell is an item id
  * ({@code mc:} = minecraft, {@code ts:} = Tom's Storage, {@code ac:} = this mod, or a full id), an arrow ({@code > < ^ v}),
@@ -47,7 +43,7 @@ public class GuideScreen extends Screen {
 	private static final int TEXT_X = 10, TEXT_W = PAGE_W - 20, TITLE_Y = 12, ICON_Y = 22, TEXT_Y = 42, TEXT_BOTTOM = H - 30;
 	private static final int TOC_ROW_H = 12;
 	private static final int CELL = 20;
-	private static final int TEXT_COLOR = 0xFF303030, TITLE_COLOR = 0xFF1F3F5F, LINK_COLOR = 0xFF1F4F8F, LINK_HOVER = 0xFF2F8F2F;
+	private static final int TEXT_COLOR = 0xFF303030, TITLE_COLOR = 0xFF1F3F5F, LINK_COLOR = 0xFF1F4F8F, LINK_HOVER = 0xFF1E5A1E;
 
 	private record Page(String id, List<Supplier<ItemLike>> icons) {}
 
@@ -142,6 +138,8 @@ public class GuideScreen extends Screen {
 	private final List<Sheet> sheets = new ArrayList<>();
 	private final int[] firstSheet = new int[PAGES.size()];
 	private int current;
+	/** Highlighted table of contents entry (page index, -1 none), set by mouse hover and Up/Down alike. */
+	private int tocSelected = -1;
 	private int left, top;
 	private Button prevBtn, nextBtn, tocBtn;
 
@@ -227,6 +225,29 @@ public class GuideScreen extends Screen {
 	}
 
 	@Override
+	public void mouseMoved(double x, double y) {
+		int idx = tocEntryAt(x, y);
+		if (idx >= 0 && idx != tocSelected) {
+			tocSelected = idx;
+			setFocused(null); // Enter then opens the entry instead of pressing a previously clicked button
+		}
+		super.mouseMoved(x, y);
+	}
+
+	/** Is a table of contents sheet shown in the current spread? */
+	private boolean tocShown() {
+		return sheets.get(current).page() < 0;
+	}
+
+	/** Moves the table of contents highlight by {@code delta} rows, turning to the spread that shows it. */
+	private void moveTocSelection(int delta) {
+		int sel = tocSelected < 0 ? sheets.get(current).part() * tocRows() : Math.clamp(tocSelected + delta, 0, PAGES.size() - 1);
+		tocSelected = sel;
+		setFocused(null);
+		show(sel / tocRows()); // table of contents sheet i = part i
+	}
+
+	@Override
 	public boolean mouseScrolled(double x, double y, double dx, double dy) {
 		if (dy != 0) {
 			turn(dy > 0 ? -1 : 1);
@@ -245,6 +266,21 @@ public class GuideScreen extends Screen {
 		if (key == InputConstants.KEY_RIGHT || key == InputConstants.KEY_PAGEDOWN) {
 			turn(1);
 			return true;
+		}
+		if (key == InputConstants.KEY_HOME) {
+			show(0);
+			return true;
+		}
+		if (tocShown()) {
+			if (key == InputConstants.KEY_UP || key == InputConstants.KEY_DOWN) {
+				moveTocSelection(key == InputConstants.KEY_UP ? -1 : 1);
+				return true;
+			}
+			// A focused button (Tab navigation) keeps Enter for itself
+			if ((key == InputConstants.KEY_RETURN || key == InputConstants.KEY_NUMPADENTER) && tocSelected >= 0 && getFocused() == null) {
+				show(firstSheet[tocSelected]);
+				return true;
+			}
 		}
 		return super.keyPressed(event);
 	}
@@ -285,7 +321,7 @@ public class GuideScreen extends Screen {
 			ItemStack h = drawSheet(g, sheets.get(si), pageX(side), mouseX, mouseY);
 			if (!h.isEmpty()) hovered = h;
 			Component pageNo = Component.translatable("guide.tsautocraft.page", si + 1, sheets.size());
-			g.text(font, pageNo, pageX(side) + (PAGE_W - font.width(pageNo)) / 2, top + H - 20, 0xFF7A6A50, false);
+			g.text(font, pageNo, pageX(side) + (PAGE_W - font.width(pageNo)) / 2, top + H - 20, 0xFF6A5A40, false);
 		}
 		if (!hovered.isEmpty()) g.setTooltipForNextFrame(font, hovered, mouseX, mouseY);
 	}
@@ -296,12 +332,15 @@ public class GuideScreen extends Screen {
 		if (s.page() < 0) {
 			g.text(font, font.plainSubstrByWidth(Component.translatable("guide.tsautocraft.contents").getString(), TEXT_W), px + TEXT_X, top + TITLE_Y, TITLE_COLOR, false);
 			g.fill(px + TEXT_X, top + TITLE_Y + 10, px + TEXT_X + TEXT_W, top + TITLE_Y + 11, 0xFFC9BB98);
-			int hover = tocEntryAt(mouseX, mouseY);
 			for (int i = 0; i < tocRows(); i++) {
 				int idx = s.part() * tocRows() + i;
 				if (idx >= PAGES.size()) break;
-				String label = Component.translatable("guide.tsautocraft.toc_entry", idx + 1, contents.get(idx).title()).getString();
-				g.text(font, font.plainSubstrByWidth(label, TEXT_W), px + TEXT_X, top + TEXT_Y + i * TOC_ROW_H + 2, idx == hover ? LINK_HOVER : LINK_COLOR, false);
+				String label = font.plainSubstrByWidth(Component.translatable("guide.tsautocraft.toc_entry", idx + 1, contents.get(idx).title()).getString(), TEXT_W);
+				int ty = top + TEXT_Y + i * TOC_ROW_H + 2;
+				boolean sel = idx == tocSelected;
+				g.text(font, label, px + TEXT_X, ty, sel ? LINK_HOVER : LINK_COLOR, false);
+				// Underline: the highlight is not only a change of hue
+				if (sel) g.fill(px + TEXT_X, ty + font.lineHeight, px + TEXT_X + font.width(label), ty + font.lineHeight + 1, LINK_HOVER);
 			}
 			return hovered;
 		}

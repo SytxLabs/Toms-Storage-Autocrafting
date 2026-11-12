@@ -15,38 +15,38 @@ A Tom's storage terminal (search, sorting, tall mode) with a pattern encoding ar
 - **Processing patterns**: any machine (mod machines, …) with free input/output amounts, scalable with x2 / x10 buttons.
 - **Smelting patterns**: furnace, blast furnace or smoker, the result is computed from the recipe.
 - **Fluid patterns**: filled containers (buckets, bottles, mod tanks) are emptied into the machine's tank, the empty containers come back.
-- **Brewing patterns**: the grid turns into a brewing stand – fuel, reagent and 1-3 bottles (may differ). Results come from the brewing recipes (mod and datapack recipes too); the fuel is only topped up when the stand runs out.
+- **Brewing patterns**: the grid turns into a brewing stand with fuel, reagent and 1-3 bottles (may differ). Results come from the brewing recipes (mod and datapack recipes too); the fuel is only topped up when the stand runs out.
 - **Substitutes** toggle: crafting patterns also accept other items the recipe allows (e.g. any planks). Set per pattern when encoding.
 - Load an existing pattern back into the grid to edit or copy it. Rename patterns in an anvil, re-encoding keeps the name.
 
 ### Pattern Provider
 Holds 9 patterns (up to 36 with Capacity Upgrades).
-- **Full block**: supplies **every** crafter and machine around it, one after the other. **Connector** (and paintable *framed* connector): supplies the block in front of it.
-- **Crafting patterns** fill a vanilla **Crafter**. How it is triggered is configurable: by your own redstone circuit (default), directly, or by a redstone pulse – which only reaches the crafter that was just filled.
-- **Processing patterns** insert all ingredients into the machine at once (all or nothing) – with machine profiles even through different sides, e.g. fuel into a furnace's fuel slot.
-- **Brewing patterns** fill the whole brewing stand: bottles, reagent and – when it is empty – the fuel slot.
-- **Any inventory works**: a pattern next to a hopper, chest or other block that is not its machine simply inserts its ingredients there (e.g. a smelting pattern into a hopper that feeds your furnace array).
+- **Full block**: supplies every crafter and machine around it, one after the other. **Connector** (and paintable *framed* connector): supplies the block in front of it.
+- **Crafting patterns** fill a vanilla **Crafter**. How it is triggered is configurable: by your own redstone circuit (default), directly, or by a redstone pulse that only reaches the crafter that was just filled.
+- **Processing patterns** insert all ingredients into the machine at once (all or nothing). With machine profiles they can use different sides, e.g. fuel into a furnace's fuel slot.
+- **Brewing patterns** fill the whole brewing stand: bottles, reagent and, when it is empty, the fuel slot.
+- **Any inventory works**: a pattern next to a hopper, chest or other block that is not its machine inserts its ingredients there (e.g. a smelting pattern into a hopper that feeds your furnace array).
 - **Blocking mode**: only push again once the machine is empty. When off, crafters get more sets of the same recipe stacked on top.
 - Crafter slot settings are respected: the recipe is moved to enabled slots.
 - **Lock mode**: wait until the result is back (or for a redstone signal) before the next delivery.
 - **Priority**: preferred providers get jobs first when several have the same pattern.
-- Shown with the name of the machine it supplies (e.g. "Crafter", "Furnace, Smoker") – or its anvil name.
+- Shown with the name of the machine it supplies (e.g. "Crafter", "Furnace, Smoker") or by its anvil name.
 
 ### Pattern Access Terminal
 All Pattern Providers of the network in one terminal: insert, take out and swap patterns from one place, with search. Works wireless.
 
 ### Request in any terminal
-Craftable items show up in **Tom's Storage / Crafting Terminal** with a green **+** (also when none are in storage).
-**Ctrl + click** opens the request dialog with an **AE2-style material list**: what comes from storage, what gets crafted (all steps) and what is missing. If something is missing, **"Craft N"** offers the largest amount you can craft right now.
-The **recipe tree** shows the whole plan as a graph with item icons and amounts: drag to move, scroll to zoom, click a node to fold it. Red = missing, blue = crafted, grey = from storage – the paths to missing items are opened right away, and you can start the job from there.
-In Tom's **Crafting Terminal**, **Ctrl + click** on JEI's/REI's "+" also crafts the missing ingredients of a recipe.
+Craftable items show up in Tom's Storage / Crafting Terminal with a green **+** (also when none are in storage).
+**Ctrl + click** opens the request dialog with an AE2-style material list: what comes from storage, what gets crafted (all steps) and what is missing. If something is missing, "Craft N" offers the largest amount you can craft right now.
+The **recipe tree** shows the whole plan as a graph with item icons and amounts: drag to move, scroll to zoom, click a node to fold it. Red = missing, blue = crafted, grey = from storage. The paths to missing items are opened right away, and you can start the job from there.
+In Tom's Crafting Terminal, **Ctrl + click** on JEI's/REI's "+" also crafts the missing ingredients of a recipe.
 
 ### Autocrafting Terminal
 Runs the crafting jobs of the network and shows all of them, including jobs started by Requesters and Exporters.
 - **Progress per step** and **why a job is stuck**: which item is missing and how many, which provider is busy (by machine or anvil name and position), no machine, storage full, …
 - **Priorities** (high / normal / low): higher priority jobs get free Pattern Providers first.
 - **Pause** (frees the reserved items) and **cancel** jobs; unprocessed ingredients of a cancelled job come back from the machines.
-- **Estimated time left** per job and a **job history** – request one of your past jobs again with one click.
+- **Estimated time left** per job and a **job history**: request one of your past jobs again with one click.
 - Jobs **reserve** their ingredients, so other jobs and Exporters do not take them away.
 - Opens from afar with Tom's **(Advanced) Wireless Terminal** (the Pattern Terminal too).
 
@@ -57,7 +57,7 @@ Keeps up to 6 items at a minimum stock and starts crafting jobs automatically wh
 12 entries with threshold and batch size: "craft 64 when there are less than 32". Pausable by redstone.
 
 ### Crafting Emitter
-Redstone signal while the network holds less / at least a set amount of an item – or in **craft mode**: the item becomes craftable and the signal is on while a job needs it (e.g. to switch a farm on).
+Redstone signal while the network holds less / at least a set amount of an item. In **craft mode** the item becomes craftable and the signal is on while a job needs it (e.g. to switch a farm on).
 Available as a full block (signal on all sides) and as a directional connector (signal only out of the front, also framed).
 
 ### Importer & Exporter
@@ -69,10 +69,10 @@ Available as a full block (signal on all sides) and as a directional connector (
 
 ### Memory Card
 Set up one block, copy it to the rest: **shift + right click** copies the settings of a Pattern Provider, Exporter, Importer, Requester, Level Maintainer or Crafting Emitter, **right click** applies them to a block of the same type.
-Ghost filters are copied directly; real filter items and missing upgrades are taken from your inventory (an empty filter is set up like the original) – the card never creates items and tells you what was missing.
+Ghost filters are copied directly; real filter items and missing upgrades are taken from your inventory (an empty filter is set up like the original). The card never creates items and tells you what was missing.
 
-### Built for big networks
-Item counts, network scans and craftable lists are cached and shared by all blocks of a network, jobs that wait for items stay idle, and terminals only send updates when something changed – so large bases with many providers and jobs stay light on TPS.
+### Performance
+Item counts, network scans and craftable lists are cached and shared by all blocks of a network, jobs that wait for items stay idle, and terminals only send updates when something changed, so large bases with many providers and jobs stay light on TPS.
 
 ### Upgrades
 Several upgrades of the same kind fit into one slot.
@@ -103,7 +103,7 @@ Several upgrades of the same kind fit into one slot.
 5. Place an **Autocrafting Terminal** on the same network: it runs the jobs.
 6. **Ctrl + click** a craftable item in any Tom's terminal → *Calculate* → *Start*.
 
-Stuck? Craft the **Autocrafting Guide** (book + Blank Pattern): an in-game book (two pages side by side) that explains every block, with setup pictures – including how to automate water bottles with a dispenser. Resource packs can translate the texts and change the pictures.
+Stuck? Craft the **Autocrafting Guide** (book + Blank Pattern): an in-game book (two pages side by side) that explains every block, with setup pictures, including how to automate water bottles with a dispenser. Resource packs can translate the texts and change the pictures.
 
 ---
 

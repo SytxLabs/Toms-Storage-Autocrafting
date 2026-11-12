@@ -29,6 +29,7 @@ import com.tom.storagemod.block.AbstractStorageTerminalBlock;
 import eu.sytxlabs.tsautocraft.ModContent;
 import eu.sytxlabs.tsautocraft.block.ConnectorNodeBlock;
 import eu.sytxlabs.tsautocraft.blockentity.AbstractIOBlockEntity;
+import eu.sytxlabs.tsautocraft.blockentity.CraftingEmitterBlockEntity;
 import eu.sytxlabs.tsautocraft.blockentity.LevelMaintainerBlockEntity;
 import eu.sytxlabs.tsautocraft.blockentity.PatternProviderBlockEntity;
 import eu.sytxlabs.tsautocraft.pattern.PatternEncoder;
@@ -98,6 +99,8 @@ public final class TestSetup {
 			pattern(p, 0, crafting(Items.OAK_LOG, 4, null));                  // log -> 4 planks
 			pattern(p, 1, crafting(Items.OAK_PLANKS, 1, Items.OAK_PLANKS));   // planks -> 4 sticks
 			pattern(p, 2, crafting(Items.COBBLESTONE, 8, null));             // furnace (8 cobblestone in a ring)
+			// Pulses the crafter after every delivery (default crafterTrigger "external" leaves that to the player)
+			p.getUpgrades().setItem(0, new ItemStack(ModContent.REDSTONE_UPGRADE));
 		}
 		// Level Maintainer (keep 32 sticks, batch 16) and Crafting Emitter + lamp on the same network
 		set(o.offset(1, 0, 3), ModContent.LEVEL_MAINTAINER);
@@ -106,8 +109,17 @@ public final class TestSetup {
 			m.setThreshold(0, 32);
 			m.setBatch(0, 16);
 		}
+		// Chest and terminal next to it do not carry the network: cable over the terminal to the connector
+		set(o.offset(1, 1, 3), toms("inventory_cable"));
+		set(o.offset(2, 1, 3), toms("inventory_cable"));
+		set(o.offset(2, 1, 2), toms("inventory_cable"));
 		set(o.offset(1, 0, 4), toms("inventory_cable"));
 		set(o.offset(1, 0, 5), ModContent.CRAFTING_EMITTER);
+		// Lamp on while fewer than 32 sticks are stored (off once the Level Maintainer has crafted them)
+		if (level.getBlockEntity(o.offset(1, 0, 5)) instanceof CraftingEmitterBlockEntity e) {
+			e.getItem().setItem(0, new ItemStack(Items.STICK));
+			e.setAmount(32);
+		}
 		set(o.offset(1, 1, 5), Blocks.REDSTONE_LAMP);
 		set(o.offset(3, 0, 4), ModContent.REQUESTER);
 		set(o.offset(3, 0, 3), toms("inventory_cable"));
@@ -149,8 +161,6 @@ public final class TestSetup {
 		all.add(new ItemStack(ModContent.BLANK_PATTERN, 16));
 		for (int c = 0; c * 27 < all.size(); c++) chest(o.offset(1 + c, 0, 2), all.subList(c * 27, Math.min(all.size(), c * 27 + 27)).toArray(ItemStack[]::new));
 	}
-
-	// --- helpers ---
 
 	/** 3x3 crafting grid: {@code count} of {@code item} in the first slots (8 = ring), {@code second} below the first. */
 	private PatternEncoder.Result crafting(Item item, int count, Item second) {

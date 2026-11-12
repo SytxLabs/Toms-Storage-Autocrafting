@@ -32,14 +32,8 @@ import eu.sytxlabs.tsautocraft.util.CustomName;
 import eu.sytxlabs.tsautocraft.util.GhostContainer;
 
 /**
- * Pattern Terminal: a Tom's Storage terminal (storage view, search, sorting) that also encodes patterns.
- * <ul>
- *   <li>3x3 ghost grid = inputs. In crafting mode every position maps exactly to the crafter slot the provider will later fill. The result is computed from the recipe automatically.</li>
- *   <li>In processing mode amounts are free (right click +1, click with stack = stack size) and the 3 output slots are set by hand.</li>
- *   <li>In smelting mode the first grid item is the input, the result comes from the furnace recipe.</li>
- *   <li>Further modes can be added by other mods ({@link PatternModes}).</li>
- *   <li>"Blank" slot: blank pattern or old pattern to overwrite; "Result" slot: encoded pattern.</li>
- * </ul>
+ * Pattern Terminal: a Tom's terminal that also encodes patterns ({@link PatternModes}). In crafting mode each grid
+ * position is the crafter slot the provider fills later. The "Blank" slot takes a blank or an old pattern to overwrite.
  */
 public class PatternTerminalBlockEntity extends StorageTerminalBlockEntity {
 	private final CustomName customName = new CustomName();

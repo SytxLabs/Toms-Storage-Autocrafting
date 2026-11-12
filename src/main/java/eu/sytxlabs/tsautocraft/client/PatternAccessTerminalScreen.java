@@ -285,14 +285,14 @@ public class PatternAccessTerminalScreen extends TSContainerScreen<PatternAccess
 			int posW = font.width(pos);
 			int nameW = COLS * 18 - 6 - posW - 6;
 			g.text(font, font.plainSubstrByWidth(e.name().getString(), nameW), GRID_X + 2, y, 0xFF303030, false);
-			g.text(font, pos, GRID_X + COLS * 18 - 3 - posW, y, 0xFF606060, false);
+			g.text(font, pos, GRID_X + COLS * 18 - 3 - posW, y, 0xFF404040, false);
 		}
 		if (menu.entries.isEmpty()) {
 			Component c = Component.translatable("label.tsautocraft.no_providers");
-			g.text(font, font.plainSubstrByWidth(c.getString(), COLS * 18), GRID_X, GRID_Y + 4, 0xFF707070, false);
+			g.text(font, font.plainSubstrByWidth(c.getString(), COLS * 18), GRID_X, GRID_Y + 4, 0xFF404040, false);
 		} else if (menu.lines.isEmpty()) {
 			Component c = Component.translatable("label.tsautocraft.no_match");
-			g.text(font, font.plainSubstrByWidth(c.getString(), COLS * 18), GRID_X, GRID_Y + 4, 0xFF707070, false);
+			g.text(font, font.plainSubstrByWidth(c.getString(), COLS * 18), GRID_X, GRID_Y + 4, 0xFF404040, false);
 		}
 	}
 

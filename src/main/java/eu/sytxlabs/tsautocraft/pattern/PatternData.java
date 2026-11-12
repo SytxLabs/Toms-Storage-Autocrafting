@@ -26,18 +26,10 @@ import eu.sytxlabs.tsautocraft.api.PatternModes;
 import eu.sytxlabs.tsautocraft.util.ItemKey;
 
 /**
- * Contents of an encoded pattern. {@code mode} is the id of its {@link PatternMode}:
- * <ul>
- *   <li>{@code tsautocraft:crafting}: exactly 9 inputs in crafter order (slot 0 = top left), empty entries allowed.
- *       The Pattern Provider places them into the {@code minecraft:crafter} exactly like this.</li>
- *   <li>{@code tsautocraft:processing}: for any machine, inputs are simply inserted.</li>
- *   <li>{@code tsautocraft:smelting}: one input, goes into the input slot of a furnace, blast furnace or smoker.</li>
- *   <li>{@code tsautocraft:fluid}: like processing, filled fluid containers are emptied into the machine's tank.</li>
- *   <li>modes of other mods ({@link PatternModes#register}).</li>
- * </ul>
- * Counts are stored in {@link Entry#count()} (int), not in the ItemStack, because {@code ItemStack.CODEC} is limited to 99.
- */
-/**
+ * Contents of an encoded pattern; {@code mode} is the id of its {@link PatternMode} ({@link PatternModes#register}).
+ * Crafting patterns have exactly 9 inputs in crafter slot order, empty entries allowed. Counts live in
+ * {@link Entry#count()} because {@code ItemStack.CODEC} caps them at 99.
+ *
  * @param derived lazily computed values (totals, hash), internal: not part of equality, always fresh per instance
  */
 public record PatternData(Identifier mode, List<Entry> inputs, List<Entry> outputs, Derived derived) implements TooltipProvider {

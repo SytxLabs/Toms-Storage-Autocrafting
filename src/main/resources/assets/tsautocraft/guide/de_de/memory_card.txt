@@ -1,6 +1,6 @@
 Speicherkarte
 
-Kopiert die Einstellungen eines Blocks auf andere Blöcke gleichen Typs: Pattern Provider (Sperrmodus, Priorität, Blockieren), Exporter und Importer (Filter, Modus, Redstone-Modus), Requester und Level Maintainer (Einträge) und Crafting Emitter (Modus, Menge).
+Kopiert die Einstellungen eines Blocks auf andere Blöcke gleichen Typs: Pattern Provider (Sperrmodus, Priorität, Blockieren), Exporter und Importer (Filter, Modus, Redstone-Modus), Requester und Bestandswächter (Einträge) sowie Crafting-Emitter (Modus, Menge).
 
 - Shift + Rechtsklick auf einen Block: Einstellungen auf die Karte kopieren.
 - Rechtsklick auf einen Block gleichen Typs: übernehmen.

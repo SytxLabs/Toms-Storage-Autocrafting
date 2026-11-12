@@ -1,6 +1,6 @@
 name: Release
 
-# Push a tag like 0.6.0 (or v0.6.0): builds all loaders/versions and attaches the jars (incl. the API jar) to a GitHub
+# Push a tag like 0.7.0 (or v0.7.0): builds all loaders/versions and attaches the jars (incl. the API jar) to a GitHub
 # release. The tag (without a leading v) must match mod.version in stonecutter.properties.toml.
 on:
   push:
@@ -13,14 +13,14 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 25
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Build all loaders and versions
         run: |
@@ -36,7 +36,7 @@ jobs:
       - name: Game tests (NeoForge 26.2, headless server)
         run: ./gradlew :26.2-neoforge:runGameTestServer --stacktrace
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: gametest-reports
@@ -51,9 +51,15 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
-      - name: Create release with the jars
+      # Re-runs (or a re-pushed tag) update the existing release instead of failing
+      - name: Create or update release with the jars
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           NOTES=$(awk "/^# $VERSION\$/{f=1;next} /^# /{f=0} f" CHANGELOG.md)
-          gh release create "$GITHUB_REF_NAME" build/libs/$VERSION/*.jar --title "$VERSION" --notes "${NOTES:-Release $VERSION}"
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" build/libs/$VERSION/*.jar --clobber
+            gh release edit "$GITHUB_REF_NAME" --title "$VERSION" --notes "${NOTES:-Release $VERSION}"
+          else
+            gh release create "$GITHUB_REF_NAME" build/libs/$VERSION/*.jar --title "$VERSION" --notes "${NOTES:-Release $VERSION}"
+          fi

@@ -116,7 +116,7 @@ public class RequesterScreen extends TSContainerScreen<RequesterMenu> implements
 
 	private static int statusColor(int st) {
 		return switch (st) {
-			case RequesterBlockEntity.ST_STOCKED -> 0xFF006400;
+			case RequesterBlockEntity.ST_STOCKED -> 0xFF004D00;
 			case RequesterBlockEntity.ST_CRAFTING -> 0xFF1E3A8A;
 			default -> 0xFF8B0000;
 		};

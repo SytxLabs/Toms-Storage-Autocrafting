@@ -9,6 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -21,18 +22,18 @@ import com.tom.storagemod.util.IDataReceiver;
 import eu.sytxlabs.tsautocraft.job.CraftingJob.TreeLine;
 
 /**
- * Full screen recipe tree of a request preview: the target on top, every pattern input as a node below the item it is
- * crafted into, with right-angled edges. A node is a slot (item + amount); the frame shows how the need is covered
- * (red = something missing, blue = crafted, grey = from storage), details in the tooltip.
- * <p>
- * Drag (or arrow keys) moves the view, the mouse wheel zooms (50-200 %) towards the mouse, a click on a node collapses /
- * expands it ("+N" = hidden nodes). The tree starts collapsed from depth 2 on, except for the paths to missing items.
- * "Start" goes back to the request dialog and starts the job there; "Back" returns to the material list.
+ * Full screen recipe tree of a request preview: target on top, pattern inputs below, right-angled edges; frame and
+ * badge show missing / crafted / stored. Starts collapsed from depth 2 except the paths to missing items. "Start"
+ * returns to the request dialog and starts the job there.
  */
 public class RecipeTreeScreen extends Screen implements IDataReceiver {
-	private static final int NODE = 20, GAP_X = 6, LEVEL_H = 34, MARGIN = 6, TOP = 22, BOTTOM = 28;
-	private static final float MIN_ZOOM = 0.5f, MAX_ZOOM = 2f;
-	private static final int COLOR_MISSING = 0xFFD03030, COLOR_CRAFTED = 0xFF3F8FE0, COLOR_STORED = 0xFF9A9A9A;
+	private static final int NODE = 20, GAP_X = 6, LEVEL_H = 34, MARGIN = 6, TOP = 32, BOTTOM = 28, BADGE = 7;
+	private static final float MIN_ZOOM = 0.5f, MAX_ZOOM = 4f;
+	private static final int FIT_PAD = 12;
+	// Frames are dark so they keep >= 3:1 against the #8B8B8B canvas; the badges carry the state without color.
+	private static final int COLOR_MISSING = 0xFF800000, COLOR_CRAFTED = 0xFF16386F, COLOR_STORED = 0xFF3A3A3A;
+	private static final int BADGE_MISSING = 0xFFB02020, BADGE_CRAFTED = 0xFF2050A0, SLOT = 0xFF6F6F6F;
+	private static final int STORED = 0, CRAFTED = 1, MISSING = 2;
 
 	private static final class Node {
 		final TreeLine line;
@@ -140,22 +141,40 @@ public class RecipeTreeScreen extends Screen implements IDataReceiver {
 		}
 	}
 
-	/** Puts the target at the top center at 100 %. */
+	/** Zooms the visible tree to fill the view and centers it; a tree too big even at {@link #MIN_ZOOM} starts at the top center. */
 	private void center() {
 		zoom = 1;
 		if (root == null) return;
-		camX = root.x + NODE / 2f;
-		camY = root.y + (viewBottom() - viewTop()) / 2f - MARGIN - 4;
+		float treeW = root.width, treeH = bottom(root) + 10; // + room for the "+N" label under collapsed nodes
+		float viewW = width - 2 * MARGIN - 2 * FIT_PAD, viewH = viewBottom() - viewTop() - 2 * FIT_PAD;
+		float fit = Math.min(viewW / treeW, viewH / treeH);
+		if (fit >= MIN_ZOOM) {
+			zoom = Math.min(fit, MAX_ZOOM);
+			camX = treeW / 2f;
+			camY = treeH / 2f;
+		} else {
+			zoom = MIN_ZOOM;
+			camX = root.x + NODE / 2f;
+			camY = ((viewBottom() - viewTop()) / 2f - FIT_PAD) / zoom;
+		}
+	}
+
+	/** Lowest edge of the visible nodes below {@code n} (world y). */
+	private static int bottom(Node n) {
+		int b = n.y + NODE;
+		if (!n.collapsed) for (Node c : n.children) b = Math.max(b, bottom(c));
+		return b;
 	}
 	//endregion
 
 	@Override
 	protected void init() {
-		int by = height - BOTTOM + 5, bw = 90;
-		int x = width / 2 - (bw * 3 + 8) / 2;
+		int by = height - BOTTOM + 5, bw = Math.min(90, (width - 2 * MARGIN - 12) / 4);
+		int x = width / 2 - (bw * 4 + 12) / 2;
 		addRenderableWidget(Button.builder(Component.translatable("button.tsautocraft.back"), _ -> onClose()).bounds(x, by, bw, 18).build());
 		addRenderableWidget(Button.builder(Component.translatable("button.tsautocraft.tree.center"), _ -> center()).bounds(x + bw + 4, by, bw, 18).build());
-		Button start = addRenderableWidget(Button.builder(Component.translatable("button.tsautocraft.start"), _ -> start()).bounds(x + 2 * (bw + 4), by, bw, 18).build());
+		addRenderableWidget(Button.builder(Component.translatable("button.tsautocraft.tree.expand_all"), _ -> expandAll()).bounds(x + 2 * (bw + 4), by, bw, 18).build());
+		Button start = addRenderableWidget(Button.builder(Component.translatable("button.tsautocraft.start"), _ -> start()).bounds(x + 3 * (bw + 4), by, bw, 18).build());
 		start.active = planOk;
 		if (!centered) {
 			centered = true;
@@ -166,6 +185,20 @@ public class RecipeTreeScreen extends Screen implements IDataReceiver {
 	private void start() {
 		minecraft.gui.setScreen(parent);
 		parent.start();
+	}
+
+	/** Opens every node; the target keeps its place on screen. */
+	private void expandAll() {
+		if (root == null) return;
+		int oldX = root.x;
+		expand(root);
+		layout();
+		camX += root.x - oldX;
+	}
+
+	private static void expand(Node n) {
+		n.collapsed = false;
+		for (Node c : n.children) expand(c);
 	}
 
 	@Override
@@ -267,12 +300,17 @@ public class RecipeTreeScreen extends Screen implements IDataReceiver {
 	@Override
 	public boolean mouseScrolled(double x, double y, double dx, double dy) {
 		if (!inView(x, y) || dy == 0) return super.mouseScrolled(x, y, dx, dy);
+		zoomAt(x, y, dy > 0);
+		return true;
+	}
+
+	/** One zoom step (in / out), the world point under {@code x, y} stays in place. */
+	private void zoomAt(double x, double y, boolean in) {
 		float wx = worldX(x), wy = worldY(y);
-		zoom = Mth.clamp(zoom * (dy > 0 ? 1.25f : 0.8f), MIN_ZOOM, MAX_ZOOM);
+		zoom = Mth.clamp(zoom * (in ? 1.25f : 0.8f), MIN_ZOOM, MAX_ZOOM);
 		if (Math.abs(zoom - 1) < 0.05f) zoom = 1;
 		camX = wx - (float) (x - width / 2.0) / zoom;
 		camY = wy - (float) (y - (viewTop() + viewBottom()) / 2.0) / zoom;
-		return true;
 	}
 
 	@Override
@@ -283,8 +321,27 @@ public class RecipeTreeScreen extends Screen implements IDataReceiver {
 			case InputConstants.KEY_RIGHT -> camX += step;
 			case InputConstants.KEY_UP -> camY -= step;
 			case InputConstants.KEY_DOWN -> camY += step;
+			case InputConstants.KEY_HOME -> center();
+			case InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> {
+				// A focused button (Tab navigation) keeps Enter for itself.
+				if (getFocused() != null || !planOk) return super.keyPressed(event);
+				start();
+			}
 			default -> {
 				return super.keyPressed(event);
+			}
+		}
+		return true;
+	}
+
+	/** +/- by typed character: works on every keyboard layout and for the numpad keys (no double step via keyPressed). */
+	@Override
+	public boolean charTyped(CharacterEvent event) {
+		switch (event.codepoint()) {
+			case '+', '=' -> zoomAt(width / 2.0, (viewTop() + viewBottom()) / 2.0, true);
+			case '-' -> zoomAt(width / 2.0, (viewTop() + viewBottom()) / 2.0, false);
+			default -> {
+				return super.charTyped(event);
 			}
 		}
 		return true;
@@ -299,9 +356,10 @@ public class RecipeTreeScreen extends Screen implements IDataReceiver {
 		g.fill(MARGIN - 1, viewTop() - 1, width - MARGIN + 1, viewBottom() + 1, 0xFF000000);
 		g.fill(MARGIN, viewTop(), width - MARGIN, viewBottom(), 0xFF8B8B8B);
 		Component head = Component.translatable("label.tsautocraft.tree.title", AutocraftingTerminalScreen.shortNumber(amount), target.getHoverName());
-		g.text(font, head, width / 2 - font.width(head) / 2, 8, 0xFFFFFFFF, true);
+		g.text(font, head, width / 2 - font.width(head) / 2, 6, 0xFFFFFFFF, true);
 		String z = Math.round(zoom * 100) + "%";
-		g.text(font, z, width - MARGIN - font.width(z), 8, 0xFFA0A0A0, true);
+		g.text(font, z, width - MARGIN - font.width(z), 6, 0xFFA0A0A0, true);
+		legend(g, 19);
 		if (root == null) return;
 
 		g.enableScissor(MARGIN, viewTop(), width - MARGIN, viewBottom());
@@ -312,6 +370,9 @@ public class RecipeTreeScreen extends Screen implements IDataReceiver {
 		pose.translate(-camX, -camY);
 		edges(g, root);
 		nodes(g, root);
+		// Badges overlap the item's corner, so they go into a stratum above the items.
+		g.nextStratum();
+		badges(g, root);
 		pose.popMatrix();
 		g.disableScissor();
 
@@ -331,12 +392,64 @@ public class RecipeTreeScreen extends Screen implements IDataReceiver {
 		}
 	}
 
+	private static int state(Node n) {
+		TreeLine l = n.line;
+		return n.more() ? STORED : l.missing() > 0 ? MISSING : l.crafts() > 0 ? CRAFTED : STORED;
+	}
+
+	private static int frameColor(int state) {
+		return state == MISSING ? COLOR_MISSING : state == CRAFTED ? COLOR_CRAFTED : COLOR_STORED;
+	}
+
+	/** Square of {@code size} with a 2px frame in the state color around a slot background. */
+	private static void frame(GuiGraphicsExtractor g, int x, int y, int size, int state) {
+		g.fill(x, y, x + size, y + size, frameColor(state));
+		g.fill(x + 2, y + 2, x + size - 2, y + size - 2, SLOT);
+	}
+
+	/** {@link #BADGE} px badge with a pixel glyph: "!" = missing, hammer = crafted; stored has none. */
+	private static void badge(GuiGraphicsExtractor g, int x, int y, int state) {
+		if (state == STORED) return;
+		g.fill(x, y, x + BADGE, y + BADGE, 0xFF000000);
+		g.fill(x + 1, y + 1, x + BADGE - 1, y + BADGE - 1, state == MISSING ? BADGE_MISSING : BADGE_CRAFTED);
+		if (state == MISSING) {
+			g.fill(x + 3, y + 1, x + 4, y + 4, 0xFFFFFFFF);
+			g.fill(x + 3, y + 5, x + 4, y + 6, 0xFFFFFFFF);
+		} else {
+			g.fill(x + 1, y + 1, x + 6, y + 3, 0xFFFFFFFF);
+			g.fill(x + 3, y + 3, x + 4, y + 6, 0xFFFFFFFF);
+		}
+	}
+
+	/** Centered row "[swatch] missing  [swatch] crafted  [swatch] stored", swatches drawn like small nodes. */
+	private void legend(GuiGraphicsExtractor g, int y) {
+		int[] states = {MISSING, CRAFTED, STORED};
+		Component[] names = {
+				Component.translatable("label.tsautocraft.tree.legend.missing"),
+				Component.translatable("label.tsautocraft.tree.legend.crafted"),
+				Component.translatable("label.tsautocraft.tree.legend.stored")};
+		int sw = 10, total = 0;
+		for (Component c : names) total += sw + 4 + font.width(c);
+		total += 12 * (names.length - 1);
+		int x = width / 2 - total / 2;
+		for (int i = 0; i < states.length; i++) {
+			frame(g, x, y, sw, states[i]);
+			badge(g, x + sw - BADGE + 2, y - 2, states[i]);
+			x += sw + 4;
+			g.text(font, names[i], x, y + 1, 0xFFFFFFFF, true);
+			x += font.width(names[i]) + 12;
+		}
+	}
+
+	private static void badges(GuiGraphicsExtractor g, Node n) {
+		badge(g, n.x + NODE - BADGE + 2, n.y - 2, state(n));
+		if (n.collapsed) return;
+		for (Node c : n.children) badges(g, c);
+	}
+
 	private void nodes(GuiGraphicsExtractor g, Node n) {
 		TreeLine l = n.line;
-		int color = n.more() ? COLOR_STORED : l.missing() > 0 ? COLOR_MISSING : l.crafts() > 0 ? COLOR_CRAFTED : COLOR_STORED;
-		g.fill(n.x, n.y, n.x + NODE, n.y + NODE, color);
-		g.fill(n.x + 1, n.y + 1, n.x + NODE - 1, n.y + NODE - 1, 0xFF373737);
-		g.fill(n.x + 2, n.y + 2, n.x + NODE - 2, n.y + NODE - 2, 0xFF6F6F6F);
+		frame(g, n.x, n.y, NODE, state(n));
 		if (n.more()) {
 			String s = "…";
 			g.text(font, s, n.x + NODE / 2 - font.width(s) / 2, n.y + 6, 0xFFFFFFFF, true);

@@ -126,7 +126,7 @@ public final class TsAutocraftConfig {
 		return new TsAutocraftConfig();
 	}
 
-	/** Writes the current values (config screen); most options apply right away, a server restart is not needed. */
+	/** Writes the current values (config screen). */
 	public static void save() {
 		instance.sanitize();
 		write(file());

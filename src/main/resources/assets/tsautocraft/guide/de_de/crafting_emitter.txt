@@ -2,7 +2,7 @@ Crafting-Emitter
 
 Gibt ein Redstone-Signal abhängig von einem Item im Netzwerk:
 - unter: solange der Bestand unter der Menge liegt,
-- über: solange der Bestand mindestens die Menge erreicht,
-- craften: das Item gilt als craftbar und das Signal ist an, solange ein Auftrag es braucht - z. B. um eine Farm einzuschalten. Die Items müssen über einen Importer oder ins Lager zurückkommen.
+- über: solange der Bestand die Menge mindestens erreicht,
+- craften: das Item gilt als craftbar und das Signal ist an, solange ein Auftrag es braucht (z. B. um eine Farm einzuschalten). Die Items müssen über einen Importer oder ins Lager zurückkommen.
 
 Der Vollblock sendet zu allen Seiten. Die gerichtete (und verkleidete gerichtete) Variante sendet nur nach vorne.

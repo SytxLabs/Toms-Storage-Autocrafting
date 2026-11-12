@@ -201,14 +201,25 @@ public class AutocraftGameTests {
 	}
 
 	/** {@code /tsautocraft testsetup} builds its stations with valid patterns (far away, not to disturb other tests). */
-	@GameTest(maxTicks = 20)
+	@GameTest(maxTicks = 100)
 	public void testSetup(GameTestHelper h) {
 		var player = h.makeMockServerPlayerInLevel();
 		player.setPos(h.absolutePos(BlockPos.ZERO).getX() + 30_000.5, 220, h.absolutePos(BlockPos.ZERO).getZ() + 0.5);
 		var lines = eu.sytxlabs.tsautocraft.command.TestSetup.build(player);
 		h.assertValueEqual(lines.size(), 4, "4 stations and no pattern errors: " + lines.stream().map(c -> c.getString()).toList());
-		BlockPos provider = player.blockPosition().offset(2 + 3, 0, 4 + 2);
-		h.assertTrue(h.getLevel().getBlockEntity(provider) instanceof PatternProviderBlockEntity p && p.getPatterns().size() == 3, "3 crafting patterns in the provider");
-		h.succeed();
+		BlockPos o = player.blockPosition().offset(2, 0, 4);
+		var level = h.getLevel();
+		h.assertTrue(level.getBlockEntity(o.offset(3, 0, 2)) instanceof PatternProviderBlockEntity p && p.getPatterns().size() == 3
+				&& p.getUpgrades().getItem(0).is(eu.sytxlabs.tsautocraft.ModContent.REDSTONE_UPGRADE), "3 crafting patterns and a Redstone Upgrade in the provider");
+		h.assertTrue(level.getBlockEntity(o.offset(1, 0, 5)) instanceof eu.sytxlabs.tsautocraft.blockentity.CraftingEmitterBlockEntity e
+				&& e.getItem().getItem(0).is(net.minecraft.world.item.Items.STICK), "Crafting Emitter watches sticks");
+		// Every node of the crafting station reaches the connector (it scans its inventories on its own ticks)
+		BlockPos[] nodes = {o.offset(3, 0, 2), o.offset(1, 0, 3), o.offset(1, 0, 5), o.offset(3, 0, 4), o.offset(4, 1, 1)};
+		String[] names = {"provider", "level maintainer", "crafting emitter", "requester", "importer"};
+		h.succeedWhen(() -> {
+			for (int i = 0; i < nodes.length; i++) {
+				h.assertTrue(eu.sytxlabs.tsautocraft.network.NetworkCache.of(level, nodes[i]).connector() != null, names[i] + " is on the network");
+			}
+		});
 	}
 }

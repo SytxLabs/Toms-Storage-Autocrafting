@@ -99,9 +99,8 @@ public final class StorageUtil {
 	private static final Map<IInventoryAccess, Counts> COUNTS = new java.util.WeakHashMap<>();
 
 	/**
-	 * Amount of {@code key} in the network storage. Tom's {@code countItems} walks every slot of every inventory, so all
-	 * counts come from one map per storage, rebuilt only when Tom's change tracker reports a change. Our own pulls and
-	 * pushes ({@link #pull}, {@link #push}) adjust the map directly, so counts stay exact within a tick.
+	 * Amount of {@code key} in the network storage. Tom's {@code countItems} walks every slot, so counts come from one map per
+	 * storage, rebuilt when Tom's change tracker changes; {@link #pull}/{@link #push} adjust it, so it stays exact within a tick.
 	 */
 	public static long count(IInventoryAccess access, Level level, ItemKey key) {
 		if (access == PlatformInventoryAccess.EMPTY) return 0;

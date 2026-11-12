@@ -11,7 +11,6 @@ public final class ItemKey {
 		this.hash = ItemStack.hashItemAndComponents(this.stack);
 	}
 
-	/** Copy with the given count. */
 	public ItemStack create(int count) {
 		return stack.copyWithCount(count);
 	}

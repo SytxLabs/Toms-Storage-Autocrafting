@@ -3,6 +3,6 @@ Crafting Emitter
 Donne un signal de redstone selon un item du réseau :
 - sous : tant que le stock est inférieur à la quantité,
 - au-dessus : tant que le stock atteint au moins la quantité,
-- fabrication : l'item compte comme fabricable et le signal est actif tant qu'une tâche en a besoin - p. ex. pour allumer une ferme. Les items doivent revenir via un Importer ou dans le stockage.
+- fabrication : l'item compte comme fabricable et le signal est actif tant qu'une tâche en a besoin (p. ex. pour allumer une ferme). Les items doivent revenir via un Importer ou dans le stockage.
 
 Le bloc plein émet sur toutes les faces. La variante directionnelle (et directionnelle habillée) n'émet que par l'avant.

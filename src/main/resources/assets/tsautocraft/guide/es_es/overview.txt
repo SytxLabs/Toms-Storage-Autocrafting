@@ -1,6 +1,6 @@
 Resumen
 
-Este mod añade autocrafting al estilo de AE2 a Tom's Simple Storage. Enseñas recetas a la red con patrones, y fabrica lo que pidas - incluidos todos los pasos intermedios.
+Este mod añade autocrafting al estilo de AE2 a Tom's Simple Storage. Enseñas recetas a la red con patrones, y fabrica lo que pidas, incluidos todos los pasos intermedios.
 
 Bloques:
 - Pattern Terminal: terminal de almacenamiento que codifica patrones.

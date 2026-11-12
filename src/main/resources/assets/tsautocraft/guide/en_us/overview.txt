@@ -1,6 +1,6 @@
 Overview
 
-This mod adds AE2-style autocrafting to Tom's Simple Storage. You teach the network recipes with patterns, and it crafts what you request - including all intermediate steps.
+This mod adds AE2-style autocrafting to Tom's Simple Storage. You teach the network recipes with patterns, and it crafts what you request, including all intermediate steps.
 
 Blocks:
 - Pattern Terminal: storage terminal that encodes patterns.

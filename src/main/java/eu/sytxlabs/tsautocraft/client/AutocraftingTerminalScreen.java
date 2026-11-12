@@ -3,6 +3,8 @@ package eu.sytxlabs.tsautocraft.client;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -34,7 +36,7 @@ import eu.sytxlabs.tsautocraft.menu.MenuUtil;
  * Top: craftable items (9x3, mouse wheel scrolls). Click selects, double click requests.
  * Middle: amount + "Request", below that the message/missing items.
  * Bottom: tabs "running" / "history"; running jobs with priority arrow (click cycles), pause/resume and the cross to cancel,
- * or the finished jobs of the network (newest first, cross on the tab bar clears them).
+ * or the finished jobs of the network (newest first, cross on the tab bar clears them). Both crosses need a second click within 3 s.
  * The tooltip of a job lists the ETA and every step with why it is stuck.
  */
 public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTerminalMenu> implements IDataReceiver {
@@ -43,11 +45,17 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 	private static final int JOBS_Y = 128, JOB_H = 11, JOB_ROWS = 3;
 	private static final int PRIO_X = 138, PAUSE_X = 149, CANCEL_X = 161, LINE_W = 128;
 	private static final int TABS_Y = 113, TAB_H = 9, TAB_X = 9, TAB_GAP = 8;
+	private static final int GLYPH_H = 9;
+	private static final long CONFIRM_MILLIS = 3000;
+	private static final String ARM_CLEAR = "hclear";
 
 	private EditBox amountBox;
 	private int scroll, jobScroll;
 	private boolean showHistory;
 	private ItemStack selected = ItemStack.EMPTY;
+	/** Destructive buttons need a second click: target of the first click ({@link #ARM_CLEAR} or "cancel" + job id) and until when it counts. */
+	private String armed;
+	private long armedUntil;
 
 	public AutocraftingTerminalScreen(AutocraftingTerminalMenu menu, Inventory inv, Component title) {
 		super(menu, inv, title, 176, 256);
@@ -123,9 +131,27 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 
 	//region Input
 
+	private boolean isArmed(String target) {
+		return target.equals(armed) && System.currentTimeMillis() < armedUntil;
+	}
+
+	/** First click arms {@code target} and returns false, the second click on it within {@link #CONFIRM_MILLIS} returns true. */
+	private boolean confirm(String target, boolean wasArmed) {
+		if (wasArmed) return true;
+		armed = target;
+		armedUntil = System.currentTimeMillis() + CONFIRM_MILLIS;
+		return false;
+	}
+
+	private static String cancelTarget(int jobId) {
+		return "cancel" + jobId;
+	}
+
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		double mx = event.x() - leftPos, my = event.y() - topPos;
+		String wasArmed = System.currentTimeMillis() < armedUntil ? armed : null;
+		armed = null; // any click disarms; a click on the armed target confirms below
 		int idx = gridIndexAt(mx, my);
 		if (idx >= 0 && idx < menu.craftables.size()) {
 			selected = menu.craftables.get(idx).item();
@@ -134,7 +160,7 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 		}
 		if (my >= TABS_Y && my < TABS_Y + TAB_H) {
 			if (showHistory && !menu.history.isEmpty() && mx >= CANCEL_X && mx < 170) {
-				if (minecraft.player != null) MenuUtil.sendToServer(minecraft.player, out -> out.putBoolean("hclear", true));
+				if (confirm(ARM_CLEAR, ARM_CLEAR.equals(wasArmed)) && minecraft.player != null) MenuUtil.sendToServer(minecraft.player, out -> out.putBoolean("hclear", true));
 				return true;
 			}
 			int tab = tabAt(mx);
@@ -156,6 +182,7 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 				if (minecraft.player == null) return false;
 				int id = visible.get(row).id();
 				String key = mx >= CANCEL_X ? "cancel" : mx >= PAUSE_X ? "pause" : "prio";
+				if (key.equals("cancel") && !confirm(cancelTarget(id), cancelTarget(id).equals(wasArmed))) return true;
 				MenuUtil.sendToServer(minecraft.player, out -> out.putInt(key, id));
 				return true;
 			}
@@ -181,6 +208,10 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 	public boolean keyPressed(KeyEvent event) {
 		if (event.isEscape()) return super.keyPressed(event);
 		if (amountBox != null && amountBox.isFocused()) {
+			if (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER) {
+				request();
+				return true;
+			}
 			if (amountBox.keyPressed(event) || amountBox.canConsumeInput()) return true;
 		}
 		return super.keyPressed(event);
@@ -259,7 +290,7 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 		List<JobView> visible = visibleJobs();
 		if (row >= visible.size() || visible.get(row).state() > CraftingJob.State.WAITING.ordinal()) return null;
 		JobView j = visible.get(row);
-		if (mx >= CANCEL_X) return Component.translatable("tooltip.tsautocraft.job.cancel");
+		if (mx >= CANCEL_X) return Component.translatable(isArmed(cancelTarget(j.id())) ? "tooltip.tsautocraft.job.cancel_confirm" : "tooltip.tsautocraft.job.cancel");
 		if (mx >= PAUSE_X) return Component.translatable(j.paused() ? "tooltip.tsautocraft.job.resume" : "tooltip.tsautocraft.job.pause");
 		return Component.translatable("tooltip.tsautocraft.job.priority", priorityName(j.priority()));
 	}
@@ -276,7 +307,7 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 
 	private Component tabTooltip(double mx, double my) {
 		if (my < TABS_Y || my >= TABS_Y + TAB_H) return null;
-		if (showHistory && !menu.history.isEmpty() && mx >= CANCEL_X && mx < 170) return Component.translatable("tooltip.tsautocraft.history.clear");
+		if (showHistory && !menu.history.isEmpty() && mx >= CANCEL_X && mx < 170) return Component.translatable(isArmed(ARM_CLEAR) ? "tooltip.tsautocraft.history.clear_confirm" : "tooltip.tsautocraft.history.clear");
 		int tab = tabAt(mx);
 		return tab < 0 ? null : Component.translatable(tab == 0 ? "tooltip.tsautocraft.tab.running" : "tooltip.tsautocraft.tab.history");
 	}
@@ -380,7 +411,7 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 			g.item(selected, 8, 75);
 			g.text(font, selected.getHoverName(), 28, 79, 0xFF404040, false);
 		} else {
-			g.text(font, Component.translatable("label.tsautocraft.select"), 8, 79, 0xFF707070, false);
+			g.text(font, Component.translatable("label.tsautocraft.select"), 8, 79, 0xFF404040, false);
 		}
 
 		int tx = TAB_X;
@@ -388,25 +419,30 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 			Component label = tabLabel(t);
 			boolean active = showHistory == (t == 1);
 			if (active) g.fill(tx - 2, TABS_Y, tx + font.width(label) + 2, TABS_Y + TAB_H, 0xFFDCDCDC);
-			g.text(font, label, tx, TABS_Y + 1, active ? 0xFF202020 : 0xFF707070, false);
+			g.text(font, label, tx, TABS_Y + 1, active ? 0xFF202020 : 0xFF404040, false);
 			tx += font.width(label) + TAB_GAP;
 		}
-		if (showHistory && !menu.history.isEmpty()) g.text(font, "✕", CANCEL_X, TABS_Y + 1, 0xFFAA0000, false);
-		if (showHistory) extractHistory(g);
+		int mx = xm - leftPos, my = ym - topPos;
+		if (showHistory && !menu.history.isEmpty()) cancelGlyph(g, TABS_Y, TABS_Y + 1, isArmed(ARM_CLEAR), mx, my);
+		if (showHistory) extractHistory(g, mx, my);
 		List<JobView> visible = visibleJobs();
 		if (!showHistory && visible.isEmpty()) {
-			g.text(font, Component.translatable("label.tsautocraft.no_jobs"), 8, JOBS_Y + 1, 0xFF707070, false);
+			g.text(font, Component.translatable("label.tsautocraft.no_jobs"), 8, JOBS_Y + 1, 0xFF404040, false);
 		}
 		for (int i = 0; i < visible.size(); i++) {
 			JobView j = visible.get(i);
 			int y = JOBS_Y + i * JOB_H + 1;
-			int color = j.paused() ? 0xFF808080 : j.requester() ? 0xFF1F3F8F : 0xFF303030;
-			g.text(font, rowCache.computeIfAbsent(j, _ -> font.plainSubstrByWidth(JobText.line(j).getString(), LINE_W)), 8, y, color, false);
+			int color = j.paused() ? 0xFF404040 : j.requester() ? 0xFF1A3A80 : 0xFF303030;
+			// Paused rows say so in words, not only through the play/pause glyph
+			g.text(font, rowCache.computeIfAbsent(j, _ -> font.plainSubstrByWidth((j.paused() ? Component.translatable("label.tsautocraft.job.paused_line", JobText.line(j)) : JobText.line(j)).getString(), LINE_W)), 8, y, color, false);
 			if (j.state() <= CraftingJob.State.WAITING.ordinal()) {
+				int cellY = JOBS_Y + i * JOB_H;
+				hoverCell(g, PRIO_X, PAUSE_X, cellY, mx, my);
+				hoverCell(g, PAUSE_X, CANCEL_X, cellY, mx, my);
 				String prio = j.priority() > 0 ? "↑" : j.priority() < 0 ? "↓" : "·";
-				g.text(font, prio, PRIO_X + 1, y, j.priority() > 0 ? 0xFF2E9E2E : j.priority() < 0 ? 0xFF8B6B00 : 0xFF707070, false);
-				g.text(font, j.paused() ? "▶" : "Ⅱ", PAUSE_X + 1, y, 0xFF1F3F8F, false);
-				g.text(font, "✕", CANCEL_X, y, 0xFFAA0000, false);
+				g.text(font, prio, PRIO_X + 1, y, j.priority() > 0 ? 0xFF0F4A0F : j.priority() < 0 ? 0xFF4F3C00 : 0xFF404040, false);
+				g.text(font, j.paused() ? "▶" : "Ⅱ", PAUSE_X + 1, y, 0xFF1A3A80, false);
+				cancelGlyph(g, cellY, y, isArmed(cancelTarget(j.id())), mx, my);
 			}
 			int barY = JOBS_Y + i * JOB_H + JOB_H - 2, barW = LINE_W;
 			g.fill(8, barY, 8 + barW, barY + 1, 0xFF8B8B8B);
@@ -415,14 +451,14 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 		if (listSize() > JOB_ROWS) {
 			int from = Mth.clamp(jobScroll, 0, maxJobScroll());
 			String range = (from + 1) + "-" + Math.min(from + JOB_ROWS, listSize()) + "/" + listSize();
-			g.text(font, range, 170 - font.width(range), JOBS_Y + JOB_ROWS * JOB_H, 0xFF707070, false);
+			g.text(font, range, 170 - font.width(range), JOBS_Y + JOB_ROWS * JOB_H, 0xFF404040, false);
 		}
 	}
 
 	/** History rows: "64x Torch: Done (1m 20s)", green done / blue automatic / red cancelled. */
-	private void extractHistory(GuiGraphicsExtractor g) {
+	private void extractHistory(GuiGraphicsExtractor g, int mx, int my) {
 		List<JobHistoryEntry> visible = visibleHistory();
-		if (visible.isEmpty()) g.text(font, Component.translatable("label.tsautocraft.history.empty"), 8, JOBS_Y + 1, 0xFF707070, false);
+		if (visible.isEmpty()) g.text(font, Component.translatable("label.tsautocraft.history.empty"), 8, JOBS_Y + 1, 0xFF404040, false);
 		for (int i = 0; i < visible.size(); i++) {
 			JobHistoryEntry h = visible.get(i);
 			int y = JOBS_Y + i * JOB_H + 1;
@@ -431,9 +467,24 @@ public class AutocraftingTerminalScreen extends TSContainerScreen<AutocraftingTe
 				Component c = h.ticks() >= 0 ? Component.translatable("label.tsautocraft.history.line_time", h.amount(), h.target().getHoverName(), result, JobText.duration(h.ticks() / 20)) : Component.translatable("label.tsautocraft.history.line", h.amount(), h.target().getHoverName(), result);
 				return font.plainSubstrByWidth(c.getString(), CANCEL_X - 8 - 2);
 			});
-			g.text(font, text, 8, y, h.cancelled() ? 0xFF8B0000 : h.automatic() ? 0xFF1F3F8F : 0xFF1E6E1E, false);
-			if (!h.automatic() && !h.target().isEmpty()) g.text(font, "↻", CANCEL_X, y, 0xFF1F3F8F, false);
+			g.text(font, text, 8, y, h.cancelled() ? 0xFF8B0000 : h.automatic() ? 0xFF1A3A80 : 0xFF0F4A0F, false);
+			if (!h.automatic() && !h.target().isEmpty()) {
+				hoverCell(g, CANCEL_X, 170, JOBS_Y + i * JOB_H, mx, my);
+				g.text(font, "↻", CANCEL_X, y, 0xFF1A3A80, false);
+			}
 		}
+	}
+
+	/** Light background under the glyph button cell {@code x0..x1} (row top {@code y0}) while the mouse is over it. */
+	private static void hoverCell(GuiGraphicsExtractor g, int x0, int x1, int y0, int mx, int my) {
+		if (mx >= x0 && mx < x1 && my >= y0 && my < y0 + GLYPH_H) g.fill(x0, y0, x1, y0 + GLYPH_H, 0x40FFFFFF);
+	}
+
+	/** The cross of a destructive button: dark red, white on red while armed (waiting for the confirming click). */
+	private void cancelGlyph(GuiGraphicsExtractor g, int cellY, int textY, boolean armedNow, int mx, int my) {
+		if (armedNow) g.fill(CANCEL_X - 1, cellY, 170, cellY + GLYPH_H, 0xFF7F0000);
+		else hoverCell(g, CANCEL_X, 170, cellY, mx, my);
+		g.text(font, "✕", CANCEL_X, textY, armedNow ? 0xFFFFFFFF : 0xFF7F0000, false);
 	}
 
 	static Component statusText(JobView j) {

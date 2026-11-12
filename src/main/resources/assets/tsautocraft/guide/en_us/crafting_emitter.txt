@@ -3,6 +3,6 @@ Crafting Emitter
 Gives a redstone signal depending on one item of the network:
 - below: while the stock is below the amount,
 - above: while the stock is at least the amount,
-- craft: the item counts as craftable and the signal is on while a job needs it - e.g. to switch on a farm. The items must come back through an Importer or into storage.
+- craft: the item counts as craftable and the signal is on while a job needs it (e.g. to switch on a farm). The items must come back through an Importer or into storage.
 
 The full block emits on all sides. The directional (and framed directional) variant only emits out of its front.

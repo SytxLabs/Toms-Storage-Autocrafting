@@ -24,7 +24,8 @@ import eu.sytxlabs.tsautocraft.menu.LevelMaintainerMenu;
 import eu.sytxlabs.tsautocraft.menu.MenuUtil;
 
 /**
- * Two columns of 6 entries: ghost item, threshold and batch (text fields), status bar (hover: status and stock).
+ * Two columns of 6 entries: ghost item, threshold and batch (text fields), status bar (hover: status and stock;
+ * shape per state, problems also get a "!" on the slot).
  * Upgrade panel on the right, redstone mode button top right (only with a Redstone Upgrade).
  */
 public class LevelMaintainerScreen extends TSContainerScreen<LevelMaintainerMenu> implements IDataReceiver {
@@ -172,8 +173,38 @@ public class LevelMaintainerScreen extends TSContainerScreen<LevelMaintainerMenu
 		for (int i = 0; i < ENTRIES; i++) {
 			int x = LevelMaintainerMenu.slotX(i) + BAR_X, y = LevelMaintainerMenu.slotY(i);
 			g.fill(x - 1, y, x + BAR_W + 1, y + 16, 0xFF373737);
-			g.fill(x, y + 1, x + BAR_W, y + 15, statusColor(menu.status[i]));
+			statusBar(g, x, y + 1, menu.status[i]);
+			if (isProblem(menu.status[i])) {
+				// Red "!" badge on the entry slot's top left corner
+				int sx = LevelMaintainerMenu.slotX(i) - 1, sy = LevelMaintainerMenu.slotY(i) - 1;
+				g.fill(sx, sy, sx + 5, sy + 9, 0xFFB02020);
+				g.text(font, "!", sx + 3 - font.width("!") / 2, sy + 1, 0xFFFFFFFF, false);
+			}
 		}
+	}
+
+	/**
+	 * Status bar of 14 px height: the shape tells the state apart without relying on the color alone.
+	 * Stocked and problems = solid, crafting = dashed, off/redstone = hollow outline.
+	 */
+	private static void statusBar(GuiGraphicsExtractor g, int x, int y, int st) {
+		int color = statusColor(st), h = 14;
+		switch (st) {
+		case LevelMaintainerBlockEntity.ST_CRAFTING -> {
+			for (int dy = 0; dy < h; dy += 4) g.fill(x, y + dy, x + BAR_W, y + Math.min(dy + 2, h), color);
+		}
+		case LevelMaintainerBlockEntity.ST_OFF, LevelMaintainerBlockEntity.ST_REDSTONE -> {
+			g.fill(x, y, x + BAR_W, y + 1, color);
+			g.fill(x, y + h - 1, x + BAR_W, y + h, color);
+			g.fill(x, y + 1, x + 1, y + h - 1, color);
+			g.fill(x + BAR_W - 1, y + 1, x + BAR_W, y + h - 1, color);
+		}
+		default -> g.fill(x, y, x + BAR_W, y + h, color);
+		}
+	}
+
+	private static boolean isProblem(int st) {
+		return st == LevelMaintainerBlockEntity.ST_MISSING || st == LevelMaintainerBlockEntity.ST_NO_PATTERN || st == LevelMaintainerBlockEntity.ST_NO_NETWORK;
 	}
 
 	private static Component statusText(int st, ItemStack item) {

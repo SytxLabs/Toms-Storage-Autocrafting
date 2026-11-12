@@ -1,6 +1,6 @@
 Aperçu
 
-Ce mod ajoute un autocrafting à la AE2 à Tom's Simple Storage. Vous apprenez des recettes au réseau avec des modèles, et il fabrique ce que vous demandez - y compris toutes les étapes intermédiaires.
+Ce mod ajoute un autocrafting à la AE2 à Tom's Simple Storage. Vous apprenez des recettes au réseau avec des modèles, et il fabrique ce que vous demandez, y compris toutes les étapes intermédiaires.
 
 Blocs :
 - Pattern Terminal : terminal de stockage qui encode des modèles.

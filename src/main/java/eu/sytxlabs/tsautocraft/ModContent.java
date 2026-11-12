@@ -65,7 +65,6 @@ public final class ModContent {
 		return java.util.Collections.unmodifiableList(TAB_ITEMS);
 	}
 
-	// --- Data component ---
 	public static final DataComponentType<PatternData> PATTERN_COMPONENT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, TsAutocraft.id("pattern"), DataComponentType.<PatternData>builder().persistent(PatternData.CODEC).build());
 	/** Description line of our blocks and upgrades (default component, see {@link ItemDescription}). */
 	public static final DataComponentType<ItemDescription> DESCRIPTION_COMPONENT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, TsAutocraft.id("description"), DataComponentType.<ItemDescription>builder().persistent(ItemDescription.CODEC).networkSynchronized(ItemDescription.STREAM_CODEC).build());
@@ -75,7 +74,6 @@ public final class ModContent {
 	/** Settings stored on a Memory Card. */
 	public static final DataComponentType<MemoryCardData> MEMORY_CARD_COMPONENT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, TsAutocraft.id("memory_card"), DataComponentType.<MemoryCardData>builder().persistent(MemoryCardData.CODEC).build());
 
-	// --- Blocks ---
 	public static final ConnectorNodeBlock EXPORTER = block("exporter", p -> new ConnectorNodeBlock(p.noOcclusion(), ExporterBlockEntity::new, false));
 	public static final FramedConnectorNodeBlock EXPORTER_FRAMED = block("exporter_framed", p -> new FramedConnectorNodeBlock(p.noOcclusion(), ExporterBlockEntity::new, false));
 	public static final ConnectorNodeBlock IMPORTER = block("importer", p -> new ConnectorNodeBlock(p.noOcclusion(), ImporterBlockEntity::new, false));
@@ -95,7 +93,6 @@ public final class ModContent {
 	/** Blocks that use Tom's painted model (client registers {@code UnbakedPaintedModel} and tint for these). */
 	public static final List<Block> FRAMED_BLOCKS = List.of(EXPORTER_FRAMED, IMPORTER_FRAMED, PATTERN_PROVIDER_CONNECTOR_FRAMED, CRAFTING_EMITTER_DIRECTIONAL_FRAMED);
 
-	// --- Items ---
 	public static final Item BLANK_PATTERN = item("blank_pattern", Item::new, p -> p.stacksTo(64));
 	public static final PatternItem PATTERN = item("pattern", PatternItem::new, p -> p.stacksTo(1));
 	public static final Item CAPACITY_UPGRADE = upgrade("capacity_upgrade");
@@ -128,7 +125,6 @@ public final class ModContent {
 		Upgrades.register(Upgrades.LEVEL_MAINTAINER, REDSTONE_UPGRADE);
 	}
 
-	// --- Block Entities ---
 	public static final BlockEntityType<ExporterBlockEntity> EXPORTER_BE = blockEntity("exporter", ExporterBlockEntity::new, EXPORTER, EXPORTER_FRAMED);
 	public static final BlockEntityType<ImporterBlockEntity> IMPORTER_BE = blockEntity("importer", ImporterBlockEntity::new, IMPORTER, IMPORTER_FRAMED);
 	public static final BlockEntityType<PatternProviderBlockEntity> PATTERN_PROVIDER_BE = blockEntity("pattern_provider", PatternProviderBlockEntity::new, PATTERN_PROVIDER, PATTERN_PROVIDER_CONNECTOR, PATTERN_PROVIDER_CONNECTOR_FRAMED);
@@ -139,7 +135,7 @@ public final class ModContent {
 	public static final BlockEntityType<LevelMaintainerBlockEntity> LEVEL_MAINTAINER_BE = blockEntity("level_maintainer", LevelMaintainerBlockEntity::new, LEVEL_MAINTAINER);
 	public static final BlockEntityType<CraftingEmitterBlockEntity> CRAFTING_EMITTER_BE = blockEntity("crafting_emitter", CraftingEmitterBlockEntity::new, CRAFTING_EMITTER, CRAFTING_EMITTER_DIRECTIONAL, CRAFTING_EMITTER_DIRECTIONAL_FRAMED);
 
-	// --- Menus (client constructor without block entity) ---
+	// Menus: the client constructor gets no block entity
 	public static final MenuType<IOMenu> EXPORTER_MENU = menu("exporter", (id, inv) -> new IOMenu(ModContent.EXPORTER_MENU, id, inv, null));
 	public static final MenuType<IOMenu> IMPORTER_MENU = menu("importer", (id, inv) -> new IOMenu(ModContent.IMPORTER_MENU, id, inv, null));
 	public static final MenuType<PatternProviderMenu> PATTERN_PROVIDER_MENU = menu("pattern_provider", PatternProviderMenu::new);
@@ -150,7 +146,6 @@ public final class ModContent {
 	public static final MenuType<LevelMaintainerMenu> LEVEL_MAINTAINER_MENU = menu("level_maintainer", LevelMaintainerMenu::new);
 	public static final MenuType<CraftingEmitterMenu> CRAFTING_EMITTER_MENU = menu("crafting_emitter", CraftingEmitterMenu::new);
 
-	// --- Creative Tab ---
 	@SuppressWarnings("unused")
     public static final CreativeModeTab TAB = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ResourceKey.create(Registries.CREATIVE_MODE_TAB, TsAutocraft.id("tab")),
 			Platform.creativeTab().title(Component.translatable("itemGroup.tsautocraft.tab")).icon(() -> new ItemStack(ModContent.PATTERN_PROVIDER))

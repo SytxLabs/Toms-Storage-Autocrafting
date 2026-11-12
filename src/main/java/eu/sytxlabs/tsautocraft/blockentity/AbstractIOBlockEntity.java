@@ -35,13 +35,8 @@ import eu.sytxlabs.tsautocraft.util.CustomName;
 import eu.sytxlabs.tsautocraft.util.UpgradeContainer;
 
 /**
- * Shared base for Exporter and Importer.
- * <p>
- * 9 filter slots: a ghost of a plain item (matched exactly, nothing is used up) or a real filter item from Tom's Storage (item filter, tag filter, polymorphic filter).
- * <p>
- * Anything that fits nowhere goes into {@link #buffer} instead of being lost, and is retried later.
- * <p>
- * Upgrades: Speed (halves the interval each), Stack (4 times more items per operation each, up to a stack), Crafting (Exporter only).
+ * Shared base for Exporter and Importer: 9 filter slots (ghost = exact item, nothing used up, or a real Tom's filter
+ * item). What fits nowhere waits in {@link #buffer} and is retried, never dropped.
  */
 public abstract class AbstractIOBlockEntity extends PaintedBlockEntity implements TickableServer, MenuProvider, Upgrades.UpgradeHost, MemoryCardHost {
 	protected final CustomName customName = new CustomName();
