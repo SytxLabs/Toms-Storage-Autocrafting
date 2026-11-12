@@ -20,7 +20,11 @@ The user (Shaun) talks German; reply in German.
   own test mod `tsautocraft-gametest`, not in the mod jar; setups built in code in `gametest/AutocraftGameTests`, report
   `versions/<mc>-fabric/build/gametest/report.xml`; Tom's terminal `FACING` = side it connects from, the connector scans its
   inventories on its own ticks, so tests wait for `preview(...).ok()` before requesting). Jars: `versions/<node>/build/libs/tsautocraft-<loader>-<ver>+<mc>.jar`; `gradlew buildAndCollect` copies all of them to `build/libs/<mod.version>/`.
-- GitHub Actions: `.github/workflows/build.yml` (push/PR: buildAndCollect + plannerTest + runGametest, jars and game test report as artifacts), `release.yml` (tag `<mod.version>` or `v<mod.version>`, e.g. `0.6.0`: GitHub release with the jars, notes = that version's CHANGELOG section).
+- GitHub Actions: `.github/workflows/build.yml` (push/PR/`workflow_call`: job `build` = buildAndCollect + jar artifact,
+  parallel job `test` = matrix per node (planner + game tests, `fail-fast: false`, report artifact
+  `gametest-report-<node>`); a new node needs a matrix entry), `release.yml` (tag `<mod.version>` or `v<mod.version>`,
+  e.g. `0.7.0`: checks the tag, calls `build.yml`, then creates or updates the GitHub release with its jars, notes =
+  that version's CHANGELOG section).
 - Runtime log: `run/logs/latest.log` (Fabric), `run-neoforge/logs/latest.log` (NeoForge).
 - Loader split: shared code in `src/main`; `src/fabric/{java,resources}` and `src/neoforge/{java,resources}` hold classes with the
   SAME fully qualified names per loader (only one folder is compiled per node): `platform/Platform` (config dir, mod loaded,

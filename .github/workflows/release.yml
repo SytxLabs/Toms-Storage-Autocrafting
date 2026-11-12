@@ -1,7 +1,8 @@
 name: Release
 
-# Push a tag like 0.7.0 (or v0.7.0): builds all loaders/versions and attaches the jars (incl. the API jar) to a GitHub
-# release. The tag (without a leading v) must match mod.version in stonecutter.properties.toml.
+# Push a tag like 0.7.0 (or v0.7.0): runs the Build workflow (all loaders/versions, tests in parallel) and attaches its
+# jars (incl. the API jar) to a GitHub release. The tag (without a leading v) must match mod.version in
+# stonecutter.properties.toml.
 on:
   push:
     tags: [ 'v*', '[0-9]*' ]
@@ -10,46 +11,38 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  check:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: 25
-
-      - uses: gradle/actions/setup-gradle@v6
-
-      - name: Build all loaders and versions
-        run: |
-          chmod +x gradlew
-          ./gradlew buildAndCollect :26.2-fabric:plannerTest :26.3-fabric:plannerTest :26.3-neoforge:runGameTestServer --stacktrace
-
-      - name: Game tests (Fabric 26.2, headless server)
-        run: ./gradlew :26.2-fabric:runGametest --stacktrace
-
-      - name: Game tests (Fabric 26.3, headless server)
-        run: ./gradlew :26.3-fabric:runGametest --stacktrace
-
-      - name: Game tests (NeoForge 26.2, headless server)
-        run: ./gradlew :26.2-neoforge:runGameTestServer --stacktrace
-
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: gametest-reports
-          path: versions/*/build/gametest/report.xml
-          if-no-files-found: ignore
-
       - name: Check tag against mod version
+        id: version
         run: |
           VERSION=$(grep -E '^mod.version' stonecutter.properties.toml | sed -E 's/.*"(.*)".*/\1/')
           if [ "$VERSION" != "${GITHUB_REF_NAME#v}" ]; then
             echo "Tag $GITHUB_REF_NAME does not match mod.version $VERSION"; exit 1
           fi
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: check
+    uses: ./.github/workflows/build.yml
+
+  release:
+    needs: [ check, build ]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: tsautocraft-jars
+          path: build/libs
 
       # Re-runs (or a re-pushed tag) update the existing release instead of failing
       - name: Create or update release with the jars
