@@ -20,7 +20,7 @@ config = "tsautocraft.mixins.json"
 [[dependencies.tsautocraft]]
 modId = "neoforge"
 type = "required"
-versionRange = "[26.3.0,)"
+versionRange = "${neoforge}"
 ordering = "NONE"
 side = "BOTH"
 
@@ -34,7 +34,7 @@ side = "BOTH"
 [[dependencies.tsautocraft]]
 modId = "toms_storage"
 type = "required"
-versionRange = "[2.12.2,)"
+versionRange = "${toms_storage}"
 ordering = "AFTER"
 side = "BOTH"
 

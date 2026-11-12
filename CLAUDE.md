@@ -1,6 +1,7 @@
 # Tom's Storage Autocrafting (tsautocraft)
 
-Fabric + NeoForge **26.3** addon for Tom's Simple Storage (`toms_storage` 2.12.2) adding AE2-style autocrafting.
+Fabric and NeoForge **26.2/26.3** addon for Tom's Simple Storage (2.11.4 on Fabric 26.2, 2.11.3 on NeoForge 26.2, 2.12.2 on 26.3)
+adding AE2-style autocrafting.
 Package `eu.sytxlabs.tsautocraft`, mod id `tsautocraft`. Code, comments and docs in English; every visible string is a translation key
 (`src/main/resources/assets/tsautocraft/lang/en_us.json` + `de_de.json`, `fr_fr.json`, `es_es.json`, keys must stay in sync;
 guide pages in `assets/tsautocraft/guide/<lang>/`).
@@ -8,16 +9,18 @@ The user (Shaun) talks German; reply in German.
 
 ## Build / run
 
-- JDK 25, Gradle 9.9.0 wrapper, Stonecutter 0.10 (one source tree, nodes `versions/<mc>-<loader>`: `26.3-fabric`,
-  `26.3-neoforge`), Loom 1.16 via `dev.kikugie.loom-back-compat` (`build.fabric.gradle.kts`), ModDevGradle
+- JDK 25, Gradle 9.9.0 wrapper, Stonecutter 0.10 (one source tree, nodes `versions/<mc>-<loader>`: `26.2-fabric`,
+  `26.2-neoforge`, `26.3-fabric`, `26.3-neoforge`), Loom 1.16 via `dev.kikugie.loom-back-compat` (`build.fabric.gradle.kts`), ModDevGradle
   (`build.neoforge.gradle.kts`). Versions per MC version/loader in `stonecutter.properties.toml` (`deps.*`).
-- `gradlew build` (all nodes), `gradlew :26.3-fabric:runClient` / `:26.3-neoforge:runClient`, `gradlew :26.3-fabric:plannerTest`
-  (Minecraft-free planner self test, must print "All planner tests passed"), `gradlew :26.3-fabric:runGametest` (Fabric game
+- `gradlew build` (all nodes), `gradlew :26.2-fabric:runClient` / `:26.2-neoforge:runClient` / `:26.3-fabric:runClient` / `:26.3-neoforge:runClient`,
+  `gradlew :26.2-fabric:plannerTest` / `:26.3-fabric:plannerTest`
+  (Minecraft-free planner self test, must print "All planner tests passed"), `gradlew :26.2-fabric:runGametest` /
+  `gradlew :26.3-fabric:runGametest` (Fabric game
   tests on a headless server, must print "All N required tests passed"; source set `gametest` = `src/gametest/{java,resources}`,
   own test mod `tsautocraft-gametest`, not in the mod jar; setups built in code in `gametest/AutocraftGameTests`, report
-  `versions/26.3-fabric/build/gametest/report.xml`; Tom's terminal `FACING` = side it connects from, the connector scans its
+  `versions/<mc>-fabric/build/gametest/report.xml`; Tom's terminal `FACING` = side it connects from, the connector scans its
   inventories on its own ticks, so tests wait for `preview(...).ok()` before requesting). Jars: `versions/<node>/build/libs/tsautocraft-<loader>-<ver>+<mc>.jar`; `gradlew buildAndCollect` copies all of them to `build/libs/<mod.version>/`.
-- GitHub Actions: `.github/workflows/build.yml` (push/PR: buildAndCollect + plannerTest + runGametest, jars and game test report as artifacts), `release.yml` (tag `<mod.version>` or `v<mod.version>`, e.g. `0.5.0`: GitHub release with the jars, notes = that version's CHANGELOG section).
+- GitHub Actions: `.github/workflows/build.yml` (push/PR: buildAndCollect + plannerTest + runGametest, jars and game test report as artifacts), `release.yml` (tag `<mod.version>` or `v<mod.version>`, e.g. `0.6.0`: GitHub release with the jars, notes = that version's CHANGELOG section).
 - Runtime log: `run/logs/latest.log` (Fabric), `run-neoforge/logs/latest.log` (NeoForge).
 - Loader split: shared code in `src/main`; `src/fabric/{java,resources}` and `src/neoforge/{java,resources}` hold classes with the
   SAME fully qualified names per loader (only one folder is compiled per node): `platform/Platform` (config dir, mod loaded,
@@ -29,14 +32,17 @@ The user (Shaun) talks German; reply in German.
 - NeoForge registration: `ModContent` registers in its static initializer, run from the first `RegisterEvent`. Tooltips via
   `RegisterTooltipAppendersEvent`, framed models via `ModelEvent.ModifyBakingResult` + Tom's `BakedPaintedModel`, config screen
   via `IConfigScreenFactory`, JEI/Jade/REI plugins by annotation (`@JeiPlugin`, `@WailaPlugin`, `TsAutocraftReiPluginNeoForge`).
-- Version-specific code in `src/main`: Stonecutter comments (`//? if >=26.4 {` ... `//?}`), switch the active node with the
+- Version-specific code in `src/main`: Stonecutter comments (`//? if <26.3 {` / `//? if >=26.3 {`), switch the active node with the
   Gradle task "Set active project to ..." and "Reset active project" (= `26.3-fabric`) before committing. A new MC version:
-  `match("<mc>", "fabric", "neoforge")` in `settings.gradle.kts` + its sections in `stonecutter.properties.toml`.
+  `match("<mc>", "fabric", "neoforge")` in `settings.gradle.kts` + its sections in `stonecutter.properties.toml`. For 26.2,
+  Tom's Storage 2.11.3 is the available NeoForge build (Fabric uses 2.11.4). Shared 26.2 API branches cover Minecraft differences.
 - Forge: not possible, Tom's Storage has no Forge build after 1.20.1.
 
-## Status (2026-11-09)
+## Status (2026-11-10)
 
-- `gradlew build` (also with `-Xlint:deprecation,unchecked,rawtypes`: no warnings), `plannerTest` and `runGametest` are green.
+- Fabric 26.2 (`26.2-fabric`) passes both planner and game tests (7 required tests); `buildAndCollect` builds all four nodes.
+- NeoForge 26.2 (`26.2-neoforge`) compiles and packages against Tom's Storage 2.11.3; runtime has not been tested in game.
+- Fabric 26.3 passes 7 required game tests; NeoForge 26.3 passes 6; both 26.2 and 26.3 planner tests and `buildAndCollect` pass.
 - 0.2.0 - 0.5.0 tested in game by the user (2026-11-09). Feature scope agreed as complete after 0.5.0 (no notification on
   job end, no fuzzy matching, no own assembler block, no job size limits, no history search, no crafting monitor, no
   per-request pattern choice, no pattern text export, no JEI hotkey request); next: new MC versions (26.4 when Tom's has it).
@@ -50,6 +56,8 @@ The user (Shaun) talks German; reply in German.
   `BlockEntity.removeComponentsFromTag` are deprecated. When unsure, check Tom's Storage source (github.com/tom5454/Toms-Storage,
   branch `snapshot` = 26.3) or the merged MC jar in `.gradle/loom-cache/minecraftMaven/.../minecraft-merged-*-26.3.jar`
   (`javap`; on Windows use `cygpath -w` and `;` in the class path).
+- 26.2 compatibility branches keep the brewing pattern using `MinecraftServer.potionBrewing()` and legacy fuel APIs;
+  `BaseEntityBlock` subclasses provide a unit codec only on 26.2, and inventory returns use the one-argument method.
 
 ## Architecture
 

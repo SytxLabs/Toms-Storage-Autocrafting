@@ -1,9 +1,22 @@
-# Tom's Storage Autocrafting (Fabric / NeoForge 26.3)
+# Tom's Storage Autocrafting (Fabric and NeoForge 26.2/26.3)
 
-Unofficial addon for [Tom's Simple Storage](https://modrinth.com/mod/toms-storage) (26.3-2.12.2, Fabric and NeoForge) that adds AE2-style autocrafting.
+Unofficial addon for [Tom's Simple Storage](https://modrinth.com/mod/toms-storage) that adds AE2-style autocrafting.
+Fabric 26.2 uses Tom's Storage 2.11.4, NeoForge 26.2 uses 2.11.3, and Fabric/NeoForge 26.3 use 2.12.2.
 All text is translatable (`assets/tsautocraft/lang/*.json`); English and German are included.
 
 Download: [Modrinth](https://modrinth.com/mod/toms-storage-autocrafting) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/toms-storage-autocrafting)
+
+## Requirements
+
+| Minecraft | Loader | Loader/API (tested version) | Tom's Storage |
+|---|---|---|---|
+| **26.2** | Fabric | Fabric Loader 0.19+; Fabric API 0.161.0+26.2 | 2.11.4+, < 2.12.0 |
+| **26.2** | NeoForge | NeoForge 26.2.0.93 | 2.11.3+, < 2.12.0 |
+| **26.3** | Fabric | Fabric Loader 0.19+; Fabric API 0.160.5+26.3 | 2.12.2+ |
+| **26.3** | NeoForge | NeoForge 26.3.0.102 | 2.12.2+ |
+
+Use Fabric API and NeoForge releases compatible with the selected Minecraft version; the versions above are the ones tested.
+Java **25+** is required. Install the mod on both client and server.
 
 ## Blocks & items
 
@@ -168,11 +181,16 @@ Requires **JDK 25**.
 ```
 gradlew build                          # all loaders -> versions/<mc>-<loader>/build/libs/tsautocraft-<loader>-<version>+<mc>.jar
 gradlew buildAndCollect                # same, all jars copied to build/libs/<version>/
+gradlew :26.2-fabric:runClient         # Fabric 26.2 test client
+gradlew :26.2-neoforge:runClient       # NeoForge 26.2 test client
 gradlew :26.3-fabric:runClient         # Fabric test client with Tom's Storage, Fabric API, JEI and Jade
-gradlew :26.3-neoforge:runClient       # NeoForge test client (run directory run-neoforge)
+gradlew :26.3-neoforge:runClient       # NeoForge 26.3 test client (run directory run-neoforge)
                                        # (-PnoJei, -PnoJade leave them out, -PwithModMenu adds Mod Menu on Fabric)
+gradlew :26.2-fabric:plannerTest       # tests the crafting planner on Fabric 26.2 without Minecraft
 gradlew :26.3-fabric:plannerTest       # tests the crafting planner without Minecraft
-gradlew :26.3-fabric:runGametest       # game tests on a headless Fabric server (crafter, furnace, cancel, reservations)
+gradlew :26.2-fabric:runGametest       # headless server tests on Fabric 26.2
+gradlew :26.3-fabric:runGametest       # headless server tests on Fabric 26.3
+gradlew :26.3-neoforge:runGameTestServer # headless NeoForge game tests
 ```
 
 One source tree for all loaders and Minecraft versions ([Stonecutter](https://stonecutter.kikugie.dev)): shared code in

@@ -106,6 +106,8 @@ tasks {
         val props = mapOf(
             "version" to project.version.toString(),
             "minecraft" to sc.properties["mod.mc_compat"],
+            "neoforge" to sc.properties["mod.neoforge_compat"],
+            "toms_storage" to sc.properties["mod.toms_compat"],
         )
         inputs.properties(props)
         filesMatching("META-INF/neoforge.mods.toml") { expand(props) }

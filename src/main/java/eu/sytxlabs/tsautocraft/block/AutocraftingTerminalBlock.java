@@ -19,6 +19,11 @@ import com.tom.storagemod.block.AbstractStorageTerminalBlock;
 
 import eu.sytxlabs.tsautocraft.blockentity.AutocraftingTerminalBlockEntity;
 
+//? if <26.3 {
+
+/*import com.mojang.serialization.MapCodec;
+*///?}
+
 /**
  * Autocrafting Terminal: shape, placement and cable connection of a Tom's terminal (connects only on its back), but no storage view - it runs the crafting jobs of the network.
  */
@@ -27,6 +32,13 @@ public class AutocraftingTerminalBlock extends AbstractStorageTerminalBlock {
 	public AutocraftingTerminalBlock(Block.Properties properties) {
 		super(properties);
 	}
+
+	//? if <26.3 {
+	/*@Override
+	protected MapCodec<? extends AbstractStorageTerminalBlock> codec() {
+		return MapCodec.unit(this);
+	}
+	*///?}
 
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

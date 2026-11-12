@@ -129,11 +129,16 @@ A public API: own pattern modes, Importer/Exporter modes, crafting providers, jo
 
 ## Requirements
 
-- Minecraft **26.3**, **Fabric Loader** 0.19+ with **Fabric API**, or **NeoForge** 26.3
-- **Tom's Simple Storage** 2.12.2+
-- Optional: **JEI** or **REI**, **Jade**, **Mod Menu** (Fabric), **Cloth Config** (config screen on NeoForge)
+| Minecraft | Loader | Loader/API (tested version) | Tom's Storage |
+|---|---|---|---|
+| **26.2** | Fabric | Fabric Loader 0.19+; Fabric API 0.161.0+26.2 | 2.11.4+, < 2.12.0 |
+| **26.2** | NeoForge | NeoForge 26.2.0.93 | 2.11.3+, < 2.12.0 |
+| **26.3** | Fabric | Fabric Loader 0.19+; Fabric API 0.160.5+26.3 | 2.12.2+ |
+| **26.3** | NeoForge | NeoForge 26.3.0.102 | 2.12.2+ |
 
-Needed on **both client and server**.
+Use Fabric API and NeoForge releases compatible with the selected Minecraft version; the versions above are the ones tested.
+Java **25+** is required. Install the mod on both client and server.
+- Optional: **JEI** or **REI**, **Jade**, **Mod Menu** (Fabric), **Cloth Config** (config screen on NeoForge)
 
 ## Links
 

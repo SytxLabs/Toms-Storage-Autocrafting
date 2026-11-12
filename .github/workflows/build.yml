@@ -22,13 +22,33 @@ jobs:
       - name: Build all loaders and versions
         run: |
           chmod +x gradlew
-          ./gradlew buildAndCollect :26.3-fabric:plannerTest --stacktrace
+          ./gradlew buildAndCollect :26.2-fabric:plannerTest :26.3-fabric:plannerTest --stacktrace
+
+      - name: Game tests (Fabric 26.2, headless server)
+        run: ./gradlew :26.2-fabric:runGametest --stacktrace
 
       - name: Game tests (Fabric, headless server)
         run: ./gradlew :26.3-fabric:runGametest --stacktrace
 
       - name: Game tests (NeoForge, headless server)
         run: ./gradlew :26.3-neoforge:runGameTestServer --stacktrace
+
+      - name: Game tests (NeoForge 26.2, headless server)
+        run: ./gradlew :26.2-neoforge:runGameTestServer --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gametest-report-26.2-neoforge
+          path: versions/26.2-neoforge/build/gametest/report.xml
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gametest-report-26.2
+          path: versions/26.2-fabric/build/gametest/report.xml
+          if-no-files-found: ignore
 
       - uses: actions/upload-artifact@v4
         if: always()

@@ -19,7 +19,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
+//? if >=26.3 {
 import net.minecraft.world.level.block.entity.SignTextSlot;
+//?}
 import net.minecraft.world.level.block.state.BlockState;
 
 import com.tom.storagemod.block.AbstractStorageTerminalBlock;
@@ -180,7 +182,12 @@ public final class TestSetup {
 		if (level.getBlockEntity(o) instanceof SignBlockEntity sign) {
 			Component[] lines = {Component.literal(station + ". ").append(Component.translatable("teststation.tsautocraft." + id)),
 					Component.translatable("teststation.tsautocraft." + id + ".l2"), Component.translatable("teststation.tsautocraft." + id + ".l3"), Component.empty()};
+			//? if >=26.3 {
 			sign.setText(new SignText(List.of(lines), List.of(lines), DyeColor.BLACK, false), SignTextSlot.FRONT);
+			//?}
+			//? if <26.3 {
+			/*sign.setText(new SignText(lines, lines, DyeColor.BLACK, false), true);
+			*///?}
 		}
 		report.add(Component.literal(station + ". ").append(Component.translatable("teststation.tsautocraft." + id)).append(" @ " + o.getX() + ", " + o.getY() + ", " + o.getZ()));
 		return o;

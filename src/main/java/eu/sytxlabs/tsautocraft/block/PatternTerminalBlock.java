@@ -17,6 +17,11 @@ import com.tom.storagemod.block.AbstractStorageTerminalBlock;
 
 import eu.sytxlabs.tsautocraft.blockentity.PatternTerminalBlockEntity;
 
+//? if <26.3 {
+
+/*import com.mojang.serialization.MapCodec;
+*///?}
+
 /**
  * Pattern Terminal: a Tom's Storage terminal (placed on an inventory or connected by cable, same shape and placement rules as the Crafting Terminal)
  * with a pattern encoding area instead of the crafting grid. Tooltip comes from the item's {@link eu.sytxlabs.tsautocraft.ItemDescription} component.
@@ -26,6 +31,13 @@ public class PatternTerminalBlock extends AbstractStorageTerminalBlock {
 	public PatternTerminalBlock(Block.Properties properties) {
 		super(properties);
 	}
+
+	//? if <26.3 {
+	/*@Override
+	protected MapCodec<? extends AbstractStorageTerminalBlock> codec() {
+		return MapCodec.unit(this);
+	}
+	*///?}
 
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

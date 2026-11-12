@@ -49,7 +49,7 @@
     "fabric-api": "*",
     "minecraft": "${minecraft}",
     "java": ">=25",
-    "toms_storage": ">=2.12.2"
+    "toms_storage": "${toms_storage}"
   },
   "suggests": {
     "jei": "*",

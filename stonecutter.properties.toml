@@ -8,6 +8,12 @@ mod.version = "0.6.0"
 deps.fabric_loader = "0.19.5"
 loomx.loom_version = "1.16-SNAPSHOT"
 
+["26.2"]
+# Releases to mark compatible on Modrinth/CurseForge
+mod.mc_releases = ["26.2"]
+# REI API (compile only, maven.shedaniel.me)
+deps.rei = "26.2.821"
+
 
 ["26.3"]
 # Releases to mark compatible on Modrinth/CurseForge
@@ -16,9 +22,24 @@ mod.mc_releases = ["26.3"]
 deps.rei = "26.3.823"
 
 
+[fabric."26.2"]
+# Range in fabric.mod.json
+mod.mc_compat = ">=26.2 <26.3"
+mod.toms_compat = ">=2.11.4 <2.12.0"
+deps.fabric_api = "0.161.0+26.2"
+# Modrinth maven IDs: Tom's Storage 2.11.4, JEI 30.48.0.244, MezzConfig 0.6.11, Jade 26.2.11
+deps.toms_storage = "26.2-2.11.4-fabric"
+deps.jei = "j62WSkzi"
+deps.mezzconfig = "E4R9OPp6"
+deps.jade = "ue8CO97w"
+deps.cloth_config = "Nv3xnWXd"
+deps.modmenu = "iRo7AZXf"
+
+
 [fabric."26.3"]
 # Range in fabric.mod.json
 mod.mc_compat = ">=26.3 <26.4"
+mod.toms_compat = ">=2.12.2"
 deps.fabric_api = "0.160.5+26.3"
 # Modrinth maven: Tom's Storage version number, the others are version ids (JEI 31.17.0.108, MezzConfig 0.6.10, Jade 26.3.5)
 deps.toms_storage = "26.3-2.12.2-fabric"
@@ -30,8 +51,10 @@ deps.modmenu = "21.0.0"
 
 
 [neoforge."26.3"]
-# Range in neoforge.mods.toml
+# Ranges in neoforge.mods.toml
 mod.mc_compat = "[26.3, 26.4)"
+mod.neoforge_compat = "[26.3.0,)"
+mod.toms_compat = "[2.12.2,)"
 deps.neo_loader = "26.3.0.102"
 # JEI 31.17.0.108, MezzConfig 0.6.11, Jade 26.3.5
 deps.toms_storage = "26.3-2.12.2"
@@ -39,3 +62,15 @@ deps.jei = "hGAWEBN8"
 deps.mezzconfig = "bmeYNg4m"
 deps.jade = "dVB8U7Td"
 deps.cloth_config = "26.3.159+neoforge"
+
+[neoforge."26.2"]
+# Tom's Storage's latest NeoForge build for 26.2 is 2.11.3 (Fabric is 2.11.4).
+mod.mc_compat = "[26.2, 26.3)"
+mod.neoforge_compat = "[26.2.0,)"
+mod.toms_compat = "[2.11.3, 2.12.0)"
+deps.neo_loader = "26.2.0.93"
+deps.toms_storage = "26.2-2.11.3"
+deps.jei = "lU7Sz0zI"
+deps.mezzconfig = "JbFLLNcY"
+deps.jade = "GBES6etT"
+deps.cloth_config = "zErG1kOw"

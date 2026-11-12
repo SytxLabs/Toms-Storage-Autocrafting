@@ -17,7 +17,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+//? if >=26.3 {
 import net.minecraft.world.item.crafting.BrewingRecipe;
+//?}
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
@@ -261,7 +263,10 @@ public final class BuiltinPatternModes {
 
 		@Override
 		public boolean matchesRecipe(Object recipe) {
-			return recipe instanceof RecipeHolder<?> h && h.value() instanceof BrewingRecipe || isJeiBrewing(recipe.getClass());
+			//? if >=26.3 {
+			if (recipe instanceof RecipeHolder<?> h && h.value() instanceof BrewingRecipe) return true;
+			//?}
+			return isJeiBrewing(recipe.getClass());
 		}
 
 		@Override
@@ -336,7 +341,7 @@ public final class BuiltinPatternModes {
 		for (int i = 0; i < p.inputs().size(); i++) {
 			PatternData.Entry e = p.inputs().get(i);
 			if (e.isEmpty() || mode.optionalInput(p, i)) continue; // e.g. brewing fuel: not planned, so not delivered here
-			List<Storage<ItemVariant>> targets = bySides.computeIfAbsent(profile.sidesFor(e.item(), index++), sides -> storagesFor(ctx, sides));
+			List<Storage<ItemVariant>> targets = bySides.computeIfAbsent(profile.sidesFor(e.item(), index++, ctx.level()), sides -> storagesFor(ctx, sides));
 			if (targets.isEmpty()) return PatternMode.Outcome.fail(DispatchResult.NO_TARGET);
 			all.addAll(targets);
 			for (int left = e.count(), max = Math.max(1, e.item().getMaxStackSize()); left > 0; left -= max) {

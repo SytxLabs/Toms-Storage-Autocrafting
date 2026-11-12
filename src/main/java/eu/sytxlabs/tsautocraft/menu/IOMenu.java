@@ -1,6 +1,8 @@
 package eu.sytxlabs.tsautocraft.menu;
 
+//? if >=26.3 {
 import net.minecraft.util.Prediction;
+//?}
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -139,7 +141,12 @@ public class IOMenu extends AbstractFilteredMenu {
 
 	/** Real filter back to the player: inventory, or dropped if it is full (runs on client and server, like vanilla clicks). */
 	private static void giveBack(Player player, ItemStack stack) {
+		//? if >=26.3 {
 		player.getInventory().placeItemBackInInventory(stack, Prediction.PREDICTED);
+		//?}
+		//? if <26.3 {
+		/*player.getInventory().placeItemBackInInventory(stack);
+		*///?}
 	}
 
 	/** JEI/REI drag: ghosts only, a Tom's filter item would be duplicated. */

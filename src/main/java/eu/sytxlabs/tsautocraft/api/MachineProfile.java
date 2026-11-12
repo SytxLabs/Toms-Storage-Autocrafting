@@ -9,11 +9,17 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
+//? if >=26.3 {
 import net.minecraft.core.component.DataComponents;
+//?}
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+//? if <26.3 {
+/*import net.minecraft.tags.ItemTags;
+*///?}
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 /**
  * How a Pattern Provider feeds one kind of machine with processing patterns (mod machines, brewing stands, ...).
@@ -65,10 +71,21 @@ public record MachineProfile(List<Direction> sides, int redstonePulse, Optional<
 
 		/** Is this route for {@code stack}, the input at {@code index} of the pattern? */
 		public boolean matches(ItemStack stack, int index) {
+			return matches(stack, index, null);
+		}
+
+		/** Is this route for {@code stack}, the input at {@code index} of the pattern? */
+		public boolean matches(ItemStack stack, int index, Level level) {
 			if (inputs.contains(index)) return true;
 			if (fuel.isPresent()) {
 				String f = fuel.get();
+				//? if >=26.3 {
 				if ((!f.equals("brewing") && stack.has(DataComponents.COOKING_FUEL)) || (!f.equals("cooking") && stack.has(DataComponents.BREWING_FUEL))) return true;
+				//?}
+				//? if <26.3 {
+				/*boolean cookingFuel = level != null && level.getServer() != null && level.getServer().fuelValues().isFuel(stack);
+				if ((!f.equals("brewing") && cookingFuel) || (!f.equals("cooking") && stack.is(ItemTags.BREWING_FUEL))) return true;
+				*///?}
 			}
 			for (String s : items) {
 				if (s.startsWith("#")) {
@@ -101,9 +118,14 @@ public record MachineProfile(List<Direction> sides, int redstonePulse, Optional<
 		this(sides, redstonePulse, blocking, List.of(), 0);
 	}
 
-	/** Faces for the input {@code stack} at {@code index} of the pattern: its route's, else {@link #sides()} (empty = the face towards the provider). */
+	/** Faces for the input {@code stack} at {@code index} of the pattern, without level-specific fuel matching. */
 	public List<Direction> sidesFor(ItemStack stack, int index) {
-		for (Route r : routes) if (r.matches(stack, index)) return r.sides();
+		return sidesFor(stack, index, null);
+	}
+
+	/** Faces for the input {@code stack} at {@code index} of the pattern: its route's, else {@link #sides()} (empty = the face towards the provider). */
+	public List<Direction> sidesFor(ItemStack stack, int index, Level level) {
+		for (Route r : routes) if (r.matches(stack, index, level)) return r.sides();
 		return sides;
 	}
 

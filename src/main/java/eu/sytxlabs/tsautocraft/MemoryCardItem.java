@@ -199,6 +199,11 @@ public class MemoryCardItem extends Item {
 	}
 
 	private static void give(Player player, ItemStack st) {
+		//? if >=26.3 {
 		player.getInventory().placeItemBackInInventory(st, net.minecraft.util.Prediction.SERVER_ONLY); // drops what does not fit
+		//?}
+		//? if <26.3 {
+		/*player.getInventory().placeItemBackInInventory(st); // drops what does not fit
+		*///?}
 	}
 }

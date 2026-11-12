@@ -9,7 +9,16 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+//? if <26.3 {
+/*import net.minecraft.tags.ItemTags;
+*///?}
+//? if >=26.3 {
 import net.minecraft.world.item.crafting.BrewingInput;
+//?}
+//? if <26.3 {
+
+/*import net.minecraft.world.item.alchemy.PotionBrewing;
+*///?}
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -70,8 +79,14 @@ public final class PatternEncoder {
 	/** Result of brewing {@code reagent} into one bottle of {@code input}, empty if there is no brewing recipe. */
 	public static ItemStack brewingResult(Level level, ItemStack input, ItemStack reagent) {
 		if (level == null || level.getServer() == null || input.isEmpty() || reagent.isEmpty()) return ItemStack.EMPTY;
+		//? if >=26.3 {
 		BrewingInput in = new BrewingInput(input.copyWithCount(1), reagent.copyWithCount(1));
 		return level.getServer().getRecipeManager().getRecipeFor(RecipeType.BREWING, in, level).map(h -> h.value().assemble(in)).orElse(ItemStack.EMPTY);
+		//?}
+		//? if <26.3 {
+		/*PotionBrewing brewing = level.getServer().potionBrewing();
+		return brewing.hasPotionMix(input, reagent) ? brewing.mix(reagent, input) : ItemStack.EMPTY;
+		*///?}
 	}
 
 	/** A brew found in a grid: {@code bottles} (1-3) bottles of {@code input} plus one {@code reagent} give {@code bottles} times {@code result}. */
@@ -116,7 +131,12 @@ public final class PatternEncoder {
 		List<ItemStack> results = brewingOutputs(level, grid);
 		if (results.isEmpty()) return Result.error("msg.tsautocraft.encode.no_brewing");
 		ItemStack fuel = grid.get(BREW_FUEL);
+		//? if >=26.3 {
 		if (!fuel.isEmpty() && !fuel.has(net.minecraft.core.component.DataComponents.BREWING_FUEL)) return Result.error("msg.tsautocraft.encode.no_brewing_fuel");
+		//?}
+		//? if <26.3 {
+		/*if (!fuel.isEmpty() && !fuel.is(ItemTags.BREWING_FUEL)) return Result.error("msg.tsautocraft.encode.no_brewing_fuel");
+		*///?}
 		List<PatternData.Entry> in = new ArrayList<>(java.util.Collections.nCopies(9, PatternData.Entry.EMPTY));
 		in.set(BREW_FUEL, fuel.isEmpty() ? PatternData.Entry.EMPTY : new PatternData.Entry(fuel, 1));
 		in.set(BREW_REAGENT, new PatternData.Entry(grid.get(BREW_REAGENT), 1));

@@ -34,7 +34,7 @@ import eu.sytxlabs.tsautocraft.pattern.PatternData;
 import eu.sytxlabs.tsautocraft.pattern.PatternEncoder;
 
 /**
- * Game tests of the whole chain (gradlew :26.3-fabric:runGametest). Every test builds its setup in code:
+ * Game tests of the whole chain (gradlew :<mc>-fabric:runGametest). Every test builds its setup in code:
  * network chest - Tom's Inventory Connector - Pattern Provider - machine, an Autocrafting Terminal behind the connector
  * and, where results come back, an Importer reached through Tom's cables.
  */

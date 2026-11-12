@@ -41,6 +41,11 @@ import com.tom.storagemod.inventory.InventoryCableNetwork;
 import com.tom.storagemod.util.BlockFace;
 import com.tom.storagemod.util.TickerUtil;
 
+//? if <26.3 {
+
+/*import com.mojang.serialization.MapCodec;
+*///?}
+
 import org.jetbrains.annotations.Nullable;
 
 import eu.sytxlabs.tsautocraft.blockentity.CraftingEmitterBlockEntity;
@@ -75,6 +80,13 @@ public class ConnectorNodeBlock extends BaseEntityBlock implements IInventoryCab
 		this.shapes = makeShapes(0.125f);
 		registerDefaultState(defaultBlockState().setValue(DOWN, false).setValue(UP, false).setValue(NORTH, false).setValue(SOUTH, false).setValue(EAST, false).setValue(WEST, false).setValue(FACING, Direction.DOWN).setValue(POWERED, false));
 	}
+
+	//? if <26.3 {
+	/*@Override
+	protected MapCodec<? extends BaseEntityBlock> codec() {
+		return MapCodec.unit(this);
+	}
+	*///?}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

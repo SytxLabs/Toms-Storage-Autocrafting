@@ -24,6 +24,11 @@ import com.tom.storagemod.block.IInventoryCable;
 import com.tom.storagemod.inventory.InventoryCableNetwork;
 import com.tom.storagemod.util.TickerUtil;
 
+//? if <26.3 {
+
+/*import com.mojang.serialization.MapCodec;
+*///?}
+
 /**
  * Base for all addon blocks: a functional node in Tom's cable network
  * ({@link IInventoryCable#isFunctionalNode()} = true), ticks on the server and opens its menu.
@@ -44,6 +49,13 @@ public class NodeBlock extends BaseEntityBlock implements IInventoryCable {
 		super(properties);
 		this.factory = factory;
 	}
+
+	//? if <26.3 {
+	/*@Override
+	protected MapCodec<? extends BaseEntityBlock> codec() {
+		return MapCodec.unit(this);
+	}
+	*///?}
 
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

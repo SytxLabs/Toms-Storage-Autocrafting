@@ -1,6 +1,6 @@
 name: Release
 
-# Push a tag like 0.5.0 (or v0.5.0): builds all loaders/versions and attaches the jars (incl. the API jar) to a GitHub
+# Push a tag like 0.6.0 (or v0.6.0): builds all loaders/versions and attaches the jars (incl. the API jar) to a GitHub
 # release. The tag (without a leading v) must match mod.version in stonecutter.properties.toml.
 on:
   push:
@@ -25,7 +25,23 @@ jobs:
       - name: Build all loaders and versions
         run: |
           chmod +x gradlew
-          ./gradlew buildAndCollect :26.3-fabric:plannerTest :26.3-fabric:runGametest :26.3-neoforge:runGameTestServer --stacktrace
+          ./gradlew buildAndCollect :26.2-fabric:plannerTest :26.3-fabric:plannerTest :26.3-neoforge:runGameTestServer --stacktrace
+
+      - name: Game tests (Fabric 26.2, headless server)
+        run: ./gradlew :26.2-fabric:runGametest --stacktrace
+
+      - name: Game tests (Fabric 26.3, headless server)
+        run: ./gradlew :26.3-fabric:runGametest --stacktrace
+
+      - name: Game tests (NeoForge 26.2, headless server)
+        run: ./gradlew :26.2-neoforge:runGameTestServer --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gametest-report-26.2-neoforge
+          path: versions/26.2-neoforge/build/gametest/report.xml
+          if-no-files-found: ignore
 
       - name: Check tag against mod version
         run: |
