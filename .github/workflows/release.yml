@@ -49,10 +49,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          NOTES=$(awk "/^# $VERSION\$/{f=1;next} /^# /{f=0} f" CHANGELOG.md)
+          cd build/libs/$VERSION
+          # Mod jar per loader and MC version + API jar and API sources per MC version; mod sources stay in the build artifact
+          FILES=$(ls *.jar | grep -v -E '^tsautocraft-(fabric|neoforge)-.*-sources\.jar$')
+          echo "Release files:" $FILES
+          NOTES=$(awk "/^# $VERSION\$/{f=1;next} /^# /{f=0} f" "$GITHUB_WORKSPACE/CHANGELOG.md")
           if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" build/libs/$VERSION/*.jar --clobber
+            gh release upload "$GITHUB_REF_NAME" $FILES --clobber
             gh release edit "$GITHUB_REF_NAME" --title "$VERSION" --notes "${NOTES:-Release $VERSION}"
           else
-            gh release create "$GITHUB_REF_NAME" build/libs/$VERSION/*.jar --title "$VERSION" --notes "${NOTES:-Release $VERSION}"
+            gh release create "$GITHUB_REF_NAME" $FILES --title "$VERSION" --notes "${NOTES:-Release $VERSION}"
           fi
