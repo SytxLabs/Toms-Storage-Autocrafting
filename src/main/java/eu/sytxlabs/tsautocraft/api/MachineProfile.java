@@ -3,6 +3,8 @@ package eu.sytxlabs.tsautocraft.api;
 import java.util.List;
 import java.util.Optional;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -69,13 +71,16 @@ public record MachineProfile(List<Direction> sides, int redstonePulse, Optional<
 			sides = List.copyOf(sides);
 		}
 
-		/** Is this route for {@code stack}, the input at {@code index} of the pattern? */
+		/** {@link #matches(ItemStack, int, Level)} without a level (before 26.3 no item then counts as cooking fuel). */
 		public boolean matches(ItemStack stack, int index) {
 			return matches(stack, index, null);
 		}
 
-		/** Is this route for {@code stack}, the input at {@code index} of the pattern? */
-		public boolean matches(ItemStack stack, int index, Level level) {
+		/**
+		 * Is this route for {@code stack}, the input at {@code index} of the pattern?
+		 * @param level only used for the cooking fuel check before 26.3 (fuel values belong to the server); null = no item counts as cooking fuel there
+		 */
+		public boolean matches(ItemStack stack, int index, @Nullable Level level) {
 			if (inputs.contains(index)) return true;
 			if (fuel.isPresent()) {
 				String f = fuel.get();
@@ -118,13 +123,16 @@ public record MachineProfile(List<Direction> sides, int redstonePulse, Optional<
 		this(sides, redstonePulse, blocking, List.of(), 0);
 	}
 
-	/** Faces for the input {@code stack} at {@code index} of the pattern, without level-specific fuel matching. */
+	/** {@link #sidesFor(ItemStack, int, Level)} without a level (before 26.3 no item then counts as cooking fuel). */
 	public List<Direction> sidesFor(ItemStack stack, int index) {
 		return sidesFor(stack, index, null);
 	}
 
-	/** Faces for the input {@code stack} at {@code index} of the pattern: its route's, else {@link #sides()} (empty = the face towards the provider). */
-	public List<Direction> sidesFor(ItemStack stack, int index, Level level) {
+	/**
+	 * Faces for the input {@code stack} at {@code index} of the pattern: its route's, else {@link #sides()} (empty = the face towards the provider).
+	 * @param level see {@link Route#matches(ItemStack, int, Level)}
+	 */
+	public List<Direction> sidesFor(ItemStack stack, int index, @Nullable Level level) {
 		for (Route r : routes) if (r.matches(stack, index, level)) return r.sides();
 		return sides;
 	}

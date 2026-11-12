@@ -175,6 +175,12 @@ public final class StorageUtil {
 				if (want <= 0) break;
 				ItemStack more = e.pull(ctx, stack, want);
 				if (more == null || more.isEmpty() || !ItemStack.isSameItemSameComponents(more, stack)) continue;
+				// An extension must not deliver more than asked: the surplus goes to storage, not to the caller
+				if (more.getCount() > want) {
+					ItemStack surplus = more.split(more.getCount() - (int) want);
+					ItemStack lost = push(access, surplus);
+					if (!lost.isEmpty()) more.grow(lost.getCount()); // nowhere to put it: the caller gets it rather than losing it
+				}
 				if (got.isEmpty()) got = more.copy();
 				else got.grow(more.getCount());
 			}
@@ -217,8 +223,8 @@ public final class StorageUtil {
 	/** Push into Tom's storage alone. @return what did not fit */
 	public static ItemStack basePush(IInventoryAccess access, ItemStack stack) {
 		if (stack.isEmpty()) return stack;
-		// Fluid units (API 4) never go into Tom's storage: what no extension took is lost (only if the tanks are full)
-		if (eu.sytxlabs.tsautocraft.api.FluidUnits.is(stack)) return ItemStack.EMPTY;
+		// Fluid units (API 4) never go into Tom's storage: what no extension took stays with the caller (tanks full, no extension)
+		if (eu.sytxlabs.tsautocraft.api.FluidUnits.is(stack)) return stack;
 		ItemStack proto = stack.copyWithCount(1);
 		int before = stack.getCount();
 		ItemStack rest = access.pushStack(stack);

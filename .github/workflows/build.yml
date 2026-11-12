@@ -36,25 +36,12 @@ jobs:
       - name: Game tests (NeoForge 26.2, headless server)
         run: ./gradlew :26.2-neoforge:runGameTestServer --stacktrace
 
+      # Reports of all nodes (versions/<node>/build/gametest/report.xml) in one artifact
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: gametest-report-26.2-neoforge
-          path: versions/26.2-neoforge/build/gametest/report.xml
-          if-no-files-found: ignore
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: gametest-report-26.2
-          path: versions/26.2-fabric/build/gametest/report.xml
-          if-no-files-found: ignore
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: gametest-report
-          path: versions/26.3-fabric/build/gametest/report.xml
+          name: gametest-reports
+          path: versions/*/build/gametest/report.xml
           if-no-files-found: ignore
 
       - uses: actions/upload-artifact@v4

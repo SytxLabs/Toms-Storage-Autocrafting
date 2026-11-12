@@ -1,8 +1,11 @@
 package eu.sytxlabs.tsautocraft;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 
 import eu.sytxlabs.tsautocraft.api.FluidUnits;
@@ -17,6 +20,9 @@ public class FluidUnitItem extends Item {
 	public Component getName(ItemStack stack) {
 		Fluid f = FluidUnits.fluid(stack);
 		if (f == null) return super.getName(stack);
-		return Component.translatable("item.tsautocraft.fluid_unit.named", f.defaultFluidState().createLegacyBlock().getBlock().getName());
+		Block block = f.defaultFluidState().createLegacyBlock().getBlock();
+		// Mod fluids without a fluid block would read "Air": use the fluid id instead
+		Component name = block == Blocks.AIR ? Component.literal(BuiltInRegistries.FLUID.getKey(f).toString()) : block.getName();
+		return Component.translatable("item.tsautocraft.fluid_unit.named", name);
 	}
 }
